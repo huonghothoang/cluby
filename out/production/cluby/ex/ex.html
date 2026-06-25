@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glimpz - Liquid Aesthetic Feed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --accent: #7c4dff;
+            --accent-glow: rgba(124, 77, 255, 0.3);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #d3dbf4 0%, #e8d6f5 35%, #fce5de 70%, #d7c7f5 100%);
+            background-attachment: fixed;
+            color: #2d3748;
+            overflow-x: hidden;
+        }
+
+        /* Lớp lưới kim cương nghiêng 45 độ giống như ảnh mẫu image_07a418.png */
+        .diamond-grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cpath d='M80 0 L160 80 L80 160 L0 80 Z' fill='none' stroke='rgba(255,255,255,0.22)' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Ambient glowing fluid blobs */
+        .ambient-glow-1 {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124, 77, 255, 0.25) 0%, transparent 70%);
+            filter: blur(100px);
+            top: -10%;
+            left: 10%;
+            z-index: 0;
+            animation: floatBlob 18s infinite alternate ease-in-out;
+        }
+
+        .ambient-glow-2 {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(252, 164, 197, 0.3) 0%, transparent 70%);
+            filter: blur(120px);
+            bottom: -10%;
+            right: 5%;
+            z-index: 0;
+            animation: floatBlob 24s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            100% { transform: translate(120px, 80px) scale(1.15); }
+        }
+
+        /* Liquid Soft Glassmorphism Card */
+        .liquid-card {
+            background: rgba(255, 255, 255, 0.42);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            box-shadow: 0 30px 60px -15px rgba(124, 77, 255, 0.08),
+            inset 0 1px 3px rgba(255, 255, 255, 0.7);
+        }
+
+        .liquid-card-interactive {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .liquid-card-interactive:hover {
+            background: rgba(255, 255, 255, 0.55);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 35px 70px -10px rgba(124, 77, 255, 0.14),
+            inset 0 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Nút bấm giọt nước tinh xảo */
+        .droplet-action-btn {
+            border-radius: 30% 70% 65% 35% / 40% 35% 65% 60%;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(135deg, #7c4dff, #448aff);
+            box-shadow: 0 10px 25px -5px rgba(124, 77, 255, 0.4),
+            inset 0 -3px 6px rgba(0,0,0,0.12),
+            0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        .droplet-action-btn:hover {
+            border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 15px 35px -5px rgba(124, 77, 255, 0.65),
+            0 0 25px rgba(255,255,255,0.5);
+        }
+
+        /* Thiết kế hình thể lỏng cho các nút Sidebar dạng dọc */
+        .nav-item-droplet {
+            border-radius: 20px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid transparent;
+        }
+
+        .nav-item-droplet:hover:not(.nav-liquid-pill) {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            border-radius: 28px 18px 28px 18px;
+            color: var(--accent) !important;
+            transform: translateY(-2px);
+        }
+
+        /* Hiệu ứng Active Tab siêu mịn màng hình giọt nước bất đối xứng */
+        .nav-liquid-pill {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.65) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.95) !important;
+            border-radius: 24px 38px 24px 38px !important;
+            box-shadow: 0 15px 35px -8px rgba(124, 77, 255, 0.18),
+            inset 0 3px 6px rgba(255, 255, 255, 0.9);
+            color: var(--accent) !important;
+            font-weight: 700;
+            transform: scale(1.06) translateY(-2px);
+        }
+
+        /* Soft glow text effect */
+        .glow-title {
+            text-shadow: 0 0 15px rgba(124, 77, 255, 0.15);
+        }
+
+        /* Hiệu ứng mờ đục siêu sang cho Modal trung tâm */
+        .premium-blur-modal {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(50px) saturate(180%);
+            -webkit-backdrop-filter: blur(50px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 50px 100px -20px rgba(124, 77, 255, 0.2),
+            0 0 40px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tùy chỉnh thanh cuộn thanh lịch */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(124, 77, 255, 0.15);
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(124, 77, 255, 0.35);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-0 md:p-4 lg:p-8 flex items-center justify-center relative">
+
+<!-- Lớp phủ mạng lưới kim cương và hiệu ứng màu lỏng -->
+<div class="diamond-grid-overlay"></div>
+<div class="ambient-glow-1"></div>
+<div class="ambient-glow-2"></div>
+
+<!-- KHUNG CHỨA GIAO DIỆN CHÍNH (CANVAS) -->
+<div class="w-full max-w-[1440px] min-h-[90vh] liquid-card rounded-[3rem] overflow-hidden flex flex-col md:flex-row relative z-10 border border-white/60 shadow-2xl">
+
+    <!-- SIDEBAR GIAO DIỆN MỀM (Rút gọn khoảng cách còn md:w-44) -->
+    <aside class="w-full md:w-44 bg-white/20 backdrop-blur-md flex flex-col p-4 md:p-5 border-r border-white/30 shrink-0">
+        <!-- Khu vực Logo thương hiệu (Căn giữa dọc) -->
+        <div class="flex flex-col items-center justify-center text-center mb-10 px-2">
+            <div class="w-11 h-11 bg-gradient-to-tr from-[#7c4dff] to-[#448aff] rounded-2xl rotate-12 flex items-center justify-center shadow-lg shadow-purple-500/20 mb-2">
+                <i class="fa-solid fa-water text-white text-lg"></i>
+            </div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-800 glow-title">Glimpz</span>
+        </div>
+
+        <!-- Các nút điều hướng dọc (Chữ ở dưới, icon lớn hơn) -->
+        <nav class="flex-1 space-y-4">
+            <button onclick="switchTab('timeline')" id="nav-timeline" class="nav-item-droplet nav-liquid-pill flex flex-col items-center justify-center space-y-2 p-5 w-full text-center transition-all duration-300 group text-[#7c4dff]">
+                <i class="fa-solid fa-house-chimney-window text-2xl transition-transform duration-300 group-hover:scale-110"></i>
+                <span class="text-xs font-bold tracking-wide">Timeline</span>
+            </button>
+            <button onclick="switchTab('events')" id="nav-events" class="nav-item-droplet flex flex-col items-center justify-center space-y-2 p-5 w-full text-center transition-all duration-300 group text-slate-600">
+                <i class="fa-solid fa-calendar-heart text-2xl transition-transform duration-300 group-hover:scale-110"></i>
+                <span class="text-xs font-medium tracking-wide">Events</span>
+            </button>
+            <button onclick="switchTab('footages')" id="nav-footages" class="nav-item-droplet flex flex-col items-center justify-center space-y-2 p-5 w-full text-center transition-all duration-300 group text-slate-600">
+                <i class="fa-solid fa-clapperboard text-2xl transition-transform duration-300 group-hover:scale-110"></i>
+                <span class="text-xs font-medium tracking-wide">Footages</span>
+            </button>
+            <button onclick="switchTab('finance')" id="nav-finance" class="nav-item-droplet flex flex-col items-center justify-center space-y-2 p-5 w-full text-center transition-all duration-300 group text-slate-600">
+                <i class="fa-solid fa-wallet text-2xl transition-transform duration-300 group-hover:scale-110"></i>
+                <span class="text-xs font-medium tracking-wide">Finance</span>
+            </button>
+        </nav>
+
+        <!-- Hồ sơ tác giả xếp dọc ở cuối sidebar -->
+        <div class="mt-auto pt-6 border-t border-white/20">
+            <div class="bg-white/40 p-4 rounded-[2rem] flex flex-col items-center text-center space-y-2 border border-white/60 shadow-inner">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" class="w-11 h-11 rounded-2xl object-cover border-2 border-white/85 shadow-md" alt="User">
+                <div>
+                    <p class="text-xs font-bold text-slate-800">Alexandra</p>
+                    <p class="text-[9px] text-slate-500 uppercase tracking-widest font-extrabold">Journalist</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- KHU VỰC NỘI DUNG CHÍNH (DỊCH CHUYỂN CUỘN TRONG) -->
+    <main class="flex-1 flex flex-col h-[90vh] overflow-y-auto custom-scroll">
+
+        <!-- THANH ĐIỀU HƯỚNG TRÊN (TOP BAR) -->
+        <header class="p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shrink-0">
+            <div>
+                <h1 id="main-tab-title" class="text-4xl font-black text-slate-800 tracking-tight glow-title">New Feed</h1>
+                <p class="text-slate-500 text-sm mt-1 font-medium">Chào buổi sáng, Alexandra! ✨</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm sự kiện..." class="w-full lg:w-72 rounded-full py-3 px-6 bg-white/50 border border-white/80 focus:outline-none focus:ring-4 focus:ring-[#7c4dff]/15 text-sm transition-all focus:bg-white/90">
+                    <i class="fa-solid fa-magnifying-glass absolute right-5 top-4 text-slate-400"></i>
+                </div>
+                <button onclick="openRequestModal()" class="droplet-action-btn text-white px-8 py-3.5 text-sm font-bold flex items-center space-x-2">
+                    <span>Yêu cầu Footage</span>
+                    <i class="fa-solid fa-plus-circle animate-pulse"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- LƯỚI HAI PHÂN VÙNG LỚN -->
+        <div class="px-8 pb-12 grid grid-cols-1 xl:grid-cols-12 gap-8 flex-1">
+
+            <!-- BÊN TRÁI: DỮ LIỆU CÁC TAB NỘI DUNG -->
+            <div class="xl:col-span-8 space-y-8">
+
+                <!-- ================= TAB 1: TIMELINE ================= -->
+                <div id="tab-content-timeline" class="space-y-8 transition-all duration-300">
+                    <!-- Feed Item 1 -->
+                    <div class="liquid-card liquid-card-interactive rounded-[3rem] p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-indigo-100 rounded-[1.5rem] flex items-center justify-center text-[#7c4dff] shadow-inner border border-white">
+                                    <i class="fa-solid fa-sparkles text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-800">Glimpz News</h3>
+                                    <p class="text-xs text-slate-400 font-medium">Quảng trường Thời đại • 5 phút trước</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleStar(this)" class="w-12 h-12 rounded-2xl bg-white/70 border border-white/60 flex items-center justify-center text-slate-400 hover:bg-amber-50 hover:text-amber-500 transition-all shadow-sm">
+                                <i class="fa-regular fa-star text-lg"></i>
+                            </button>
+                        </div>
+
+                        <p class="text-slate-600 leading-relaxed mb-6 font-medium">
+                            Cuộc trình diễn ánh sáng drone lớn nhất lịch sử vừa diễn ra tại trung tâm thành phố, mang lại những thước phim vô giá cho các nhà báo tác nghiệp toàn cầu...
+                        </p>
+
+                        <div class="grid grid-cols-2 gap-4 rounded-[2.5rem] overflow-hidden border border-white/60 shadow-sm">
+                            <div class="overflow-hidden h-56">
+                                <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="News 1">
+                            </div>
+                            <div class="overflow-hidden h-56">
+                                <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="News 2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feed Item 2 -->
+                    <div class="liquid-card liquid-card-interactive rounded-[3rem] p-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full -translate-y-16 translate-x-16"></div>
+
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                            <div class="flex items-center space-x-4">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop" class="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md" alt="Alex">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-lg">Alex Higgins</h3>
+                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Agency Leader</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl font-black text-slate-800 glow-title">$950</span>
+                                <span class="bg-emerald-100 text-emerald-600 border border-emerald-200 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter">Đã Duyệt</span>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-600 mb-8 leading-relaxed font-medium">
+                            Chúng tôi cần thu thập các phân cảnh từ lễ hội âm nhạc Crystal. Ưu tiên các góc máy Cinematic độc đáo và định dạng hình ảnh thô 4K RAW.
+                        </p>
+
+                        <div class="flex flex-wrap gap-4 pt-6 border-t border-white/40">
+                            <div class="flex items-center space-x-2 text-slate-500 bg-white/40 px-4 py-2 rounded-2xl border border-white shadow-sm">
+                                <i class="fa-solid fa-map-location-dot text-[#7c4dff]"></i>
+                                <span class="text-xs font-bold uppercase">Samara, Russia</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-slate-500 bg-white/40 px-4 py-2 rounded-2xl border border-white shadow-sm">
+                                <i class="fa-solid fa-calendar-check text-[#448aff]"></i>
+                                <span class="text-xs font-bold uppercase">15 Th09, 2026</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 2: EVENTS ================= -->
+                <div id="tab-content-events" class="space-y-6 hidden transition-all duration-300">
+                    <div class="liquid-card rounded-[3rem] p-8">
+                        <h2 class="text-2xl font-black text-slate-800 mb-4 flex items-center space-x-3">
+                            <i class="fa-solid fa-compass-drafting text-[#7c4dff]"></i>
+                            <span>Các Sự Kiện Đưa Tin Đang Diễn Ra</span>
+                        </h2>
+                        <p class="text-slate-500 text-sm mb-6 font-medium">Hãy theo dõi các luồng tin nổi bật và đăng ký tác nghiệp hiện trường.</p>
+
+                        <div class="space-y-4">
+                            <!-- Event Item 1 -->
+                            <div class="bg-white/40 border border-white/60 p-5 rounded-3xl flex items-center justify-between hover:bg-white/60 transition-all duration-300">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg">
+                                        <i class="fa-solid fa-fire-flame-curved"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base">Giải cứu Khẩn cấp Núi lửa Merapi</h4>
+                                        <p class="text-xs text-slate-400 font-medium">Java, Indonesia &bull; 12 Phóng viên hiện trường</p>
+                                    </div>
+                                </div>
+                                <span class="bg-orange-100 text-orange-600 border border-orange-200 px-3 py-1 rounded-full text-xs font-bold">Khẩn Cấp</span>
+                            </div>
+
+                            <!-- Event Item 2 -->
+                            <div class="bg-white/40 border border-white/60 p-5 rounded-3xl flex items-center justify-between hover:bg-white/60 transition-all duration-300">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-500 text-lg">
+                                        <i class="fa-solid fa-microchip animate-spin"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base">Hội nghị Đỉnh cao Trí tuệ Nhân tạo Toàn cầu</h4>
+                                        <p class="text-xs text-slate-400 font-medium">Thung lũng Silicon, USA &bull; 45 Phóng viên hiện trường</p>
+                                    </div>
+                                </div>
+                                <span class="bg-blue-100 text-blue-600 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Công Nghệ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 3: FOOTAGES ================= -->
+                <div id="tab-content-footages" class="space-y-6 hidden transition-all duration-300">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Footage Item 1 -->
+                        <div class="liquid-card rounded-[3rem] p-6">
+                            <div class="h-44 rounded-2xl overflow-hidden relative mb-4">
+                                <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Nature">
+                                <span class="absolute top-3 left-3 bg-slate-900/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full">4K Cinematic</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-base mb-1">Toàn cảnh Thung lũng Sương mù</h4>
+                            <p class="text-xs text-slate-400 font-medium mb-4">Thời lượng: 02:45 &bull; Dung lượng: 1.2 GB</p>
+                            <button onclick="triggerToast('Bắt đầu tải file gốc thô...')" class="w-full bg-[#7c4dff] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-opacity-90 transition">Tải xuống Footage</button>
+                        </div>
+
+                        <!-- Footage Item 2 -->
+                        <div class="liquid-card rounded-[3rem] p-6">
+                            <div class="h-44 rounded-2xl overflow-hidden relative mb-4">
+                                <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=500&auto=format&fit=crop" class="w-full h-full object-cover" alt="Forest">
+                                <span class="absolute top-3 left-3 bg-slate-900/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full">1080p RAW</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-base mb-1">Cảnh Đời Thường Trong Rừng Sâu</h4>
+                            <p class="text-xs text-slate-400 font-medium mb-4">Thời lượng: 01:20 &bull; Dung lượng: 450 MB</p>
+                            <button onclick="triggerToast('Bắt đầu tải file gốc thô...')" class="w-full bg-[#7c4dff] text-white py-2.5 rounded-xl font-bold text-xs hover:bg-opacity-90 transition">Tải xuống Footage</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 4: FINANCE ================= -->
+                <div id="tab-content-finance" class="space-y-6 hidden transition-all duration-300">
+                    <div class="liquid-card rounded-[3rem] p-8">
+                        <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center space-x-3">
+                            <i class="fa-solid fa-piggy-bank text-[#7c4dff]"></i>
+                            <span>Thống Kê Tài Chính & Thu Nhập</span>
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white/40 border border-white/60 p-6 rounded-3xl text-center">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Số Dư Hiện Tại</p>
+                                <p class="text-3xl font-black text-[#7c4dff]">$15,420</p>
+                            </div>
+                            <div class="bg-white/40 border border-white/60 p-6 rounded-3xl text-center">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Đang Chờ Duyệt</p>
+                                <p class="text-3xl font-black text-slate-700">$2,300</p>
+                            </div>
+                            <div class="bg-white/40 border border-white/60 p-6 rounded-3xl text-center">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Tổng Thu Nhập</p>
+                                <p class="text-3xl font-black text-slate-800">$45,850</p>
+                            </div>
+                        </div>
+                        <button onclick="triggerToast('Lệnh rút tiền đã gửi lên hệ thống kiểm duyệt.')" class="w-full bg-gradient-to-r from-[#7c4dff] to-[#448aff] text-white py-3.5 rounded-2xl font-bold text-sm shadow-md hover:scale-[1.01] transition-all">Yêu Cầu Rút Tiền Về Ngân Hàng</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BÊN PHẢI: CÁC TIỆN ÍCH PHỤ TRỢ (WIDGETS & ADVANCED TOOLS) -->
+            <div class="xl:col-span-4 space-y-8">
+
+                <!-- TIỆN ÍCH 1: CÔNG CỤ NÂNG CAO MÔ PHỎNG (AI TOOLKIT) -->
+                <div class="liquid-card p-8 rounded-[3rem] relative overflow-hidden group">
+                    <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Hệ Thống Tiện Ích Độc Quyền</h4>
+                    <p class="text-xs text-slate-400 font-medium mb-6">Trải nghiệm những khả năng xử lý hình ảnh hiện đại bằng thuật toán thông minh.</p>
+
+                    <div class="space-y-3">
+                        <button onclick="openSimulationModal('AI Enhancer')" class="w-full py-3 px-4 bg-white/40 hover:bg-white/70 border border-white/80 rounded-2xl text-left text-sm font-semibold text-slate-700 flex items-center justify-between transition duration-200">
+                            <span>🚀 Phân tích & Tối ưu AI</span>
+                            <i class="fa-solid fa-circle-bolt text-indigo-500"></i>
+                        </button>
+                        <button onclick="openSimulationModal('Cinematic Grading')" class="w-full py-3 px-4 bg-white/40 hover:bg-white/70 border border-white/80 rounded-2xl text-left text-sm font-semibold text-slate-700 flex items-center justify-between transition duration-200">
+                            <span>🎨 Áp Bộ Lọc Màu Điện Ảnh</span>
+                            <i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i>
+                        </button>
+                        <button onclick="openSimulationModal('Secure Source Check')" class="w-full py-3 px-4 bg-white/40 hover:bg-white/70 border border-white/80 rounded-2xl text-left text-sm font-semibold text-slate-700 flex items-center justify-between transition duration-200">
+                            <span>🔒 Kiểm Tra Xác Minh Tác Giả</span>
+                            <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TIỆN ÍCH 2: ỦNG HỘ GLIMPZ (Coffee Support) -->
+                <div class="liquid-card p-8 rounded-[3rem] text-center border-white">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Support Team</p>
+                    <button onclick="openCoffeeModal()" class="w-full bg-[#FFDD00] hover:bg-[#ffe646] py-4 rounded-3xl font-black text-slate-800 shadow-[0_8px_0_#e6c300] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center space-x-2">
+                        <span class="text-xl">☕</span>
+                        <span>Mời tôi ly cà phê</span>
+                    </button>
+                </div>
+
+                <!-- TIỆN ÍCH 3: ĐĂNG KÝ BẢN TIN (Newsletter Form) -->
+                <div class="bg-[#1e293b] p-8 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-all"></div>
+
+                    <div class="bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                        <i class="fa-solid fa-paper-plane text-white text-xl"></i>
+                    </div>
+
+                    <h4 class="text-white text-xl font-bold mb-2">Đăng ký Footages 🦉</h4>
+                    <p class="text-slate-400 text-xs mb-6 leading-relaxed">Nhận những tin tức nóng hổi nhất từ thế giới phim tài liệu ngay lập tức.</p>
+
+                    <form onsubmit="handleSubscribe(event)" class="space-y-3">
+                        <input type="email" id="newsletter-email" placeholder="Địa chỉ email..." required class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#7c4dff] transition-all">
+                        <button type="submit" class="w-full bg-[#7c4dff] hover:bg-[#946bff] text-white py-3 rounded-2xl font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all">
+                            Đăng ký ngay
+                        </button>
+                    </form>
+                </div>
+
+                <!-- TIỆN ÍCH 4: THÔNG TIN VỀ CHÚNG TÔI (About us) -->
+                <div class="liquid-card p-8 rounded-[3rem]">
+                    <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Về Glimpz</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed font-medium">
+                        Nền tảng kết nối các nhà báo hiện trường, nhà quay phim tư liệu với các hãng truyền thông hàng đầu thế giới một cách bảo mật, chuyên nghiệp và mượt mà nhất.
+                    </p>
+                    <div class="flex gap-4 mt-6">
+                        <a href="#" class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#1D9BF0] shadow-sm hover:scale-110 transition-transform"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#1877F2] shadow-sm hover:scale-110 transition-transform"><i class="fa-brands fa-facebook"></i></a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- ================= HỆ THỐNG CÁC POPUP MODAL (LÀM MỜ NỀN TRUNG TÂM) ================= -->
+
+<!-- MODAL 1: YÊU CẦU FOOTAGE -->
+<div id="request-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xl hidden items-center justify-center z-50 p-4 transition-all duration-300">
+    <div class="premium-blur-modal rounded-[2.5rem] w-full max-w-lg p-8 relative shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <button onclick="closeRequestModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h2 class="text-2xl font-black text-slate-800 mb-2">Đăng Ký Footage Mới</h2>
+        <p class="text-xs text-slate-400 mb-6">Điền chi tiết các yêu cầu về thước phim tư liệu hiện trường cần thu thập.</p>
+
+        <form onsubmit="submitFootageRequest(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1 ml-1">Đề Tài Sự Kiện</label>
+                <input type="text" required placeholder="Ví dụ: Đại nhạc hội Glimpz 2026" class="w-full px-4 py-2.5 bg-white/70 border border-white/60 rounded-xl focus:ring-2 focus:ring-[#7c4dff] focus:outline-none transition">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1 ml-1">Vị Trí Cụ Thể</label>
+                <input type="text" required placeholder="Ví dụ: Đà Nẵng, Việt Nam" class="w-full px-4 py-2.5 bg-white/70 border border-white/60 rounded-xl focus:ring-2 focus:ring-[#7c4dff] focus:outline-none transition">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1 ml-1">Ngân Sách ($)</label>
+                    <input type="number" required placeholder="500" class="w-full px-4 py-2.5 bg-white/70 border border-white/60 rounded-xl focus:ring-2 focus:ring-[#7c4dff] focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1 ml-1">Thời Hạn Cuối</label>
+                    <input type="date" required class="w-full px-4 py-2.5 bg-white/70 border border-white/60 rounded-xl focus:ring-2 focus:ring-[#7c4dff] focus:outline-none transition">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" onclick="closeRequestModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 bg-white/60 hover:bg-slate-50 transition">Huỷ</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#7c4dff] text-white font-medium transition">Gửi Đăng Ký</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 2: BUY ME A COFFEE (CÀ PHÊ ỦNG HỘ) -->
+<div id="coffee-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xl hidden items-center justify-center z-50 p-4 transition-all duration-300">
+    <div class="premium-blur-modal rounded-[2.5rem] w-full max-w-sm p-8 relative shadow-2xl text-center">
+        <button onclick="closeCoffeeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <span class="text-5xl block mb-4 filter drop-shadow-md">☕</span>
+        <h2 class="text-2xl font-black text-slate-800 mb-2">Mời tôi một ly Cà phê</h2>
+        <p class="text-xs text-slate-400 mb-6">Xin chân thành cảm ơn tấm lòng ủng hộ của quý khách cho đội ngũ Glimpz!</p>
+
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <button onclick="selectCoffeeAmount(this, 3)" class="py-3 bg-white/60 border-2 border-transparent hover:border-amber-400 rounded-2xl font-bold text-slate-700 transition">
+                $3
+            </button>
+            <button onclick="selectCoffeeAmount(this, 5)" class="py-3 bg-white/60 border-2 border-amber-400 rounded-2xl font-bold text-slate-700 transition">
+                $5
+            </button>
+            <button onclick="selectCoffeeAmount(this, 10)" class="py-3 bg-white/60 border-2 border-transparent hover:border-amber-400 rounded-2xl font-bold text-slate-700 transition">
+                $10
+            </button>
+        </div>
+
+        <button onclick="confirmCoffeePayment()" class="w-full py-3.5 bg-[#FFDD00] text-slate-800 font-extrabold rounded-2xl shadow-md shadow-amber-500/10 hover:bg-opacity-90 transition">
+            Gửi Tặng ☕
+        </button>
+    </div>
+</div>
+
+<!-- MODAL 3: MÔ PHỎNG CHỨC NĂNG NÂNG CAO (AI TOOLKIT MODAL) -->
+<div id="simulation-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xl hidden items-center justify-center z-50 p-4 transition-all duration-300">
+    <div class="premium-blur-modal rounded-[2.5rem] w-full max-w-md p-8 relative shadow-2xl text-center">
+        <button onclick="closeSimulationModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+
+        <div id="sim-icon-box" class="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg"></div>
+
+        <h2 id="sim-title" class="text-2xl font-black text-slate-800 mb-2"></h2>
+        <p id="sim-desc" class="text-sm text-slate-500 mb-6 font-medium leading-relaxed"></p>
+
+        <div class="space-y-4">
+            <div class="bg-white/40 border border-white/60 p-4 rounded-2xl flex items-center justify-between text-xs font-bold text-slate-500 shadow-sm">
+                <span>Trạng thái tiến trình:</span>
+                <span id="sim-status" class="text-indigo-600 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-notch animate-spin"></i>
+                        <span>Đang xử lý...</span>
+                    </span>
+            </div>
+            <button onclick="closeSimulationModal()" class="w-full py-3 bg-[#7c4dff] text-white font-bold rounded-2xl transition hover:bg-opacity-95">Hoàn tất</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST THÔNG BÁO TINH TẾ GÓC PHẢI -->
+<div id="toast" class="fixed bottom-10 right-10 bg-white/80 backdrop-blur-xl border border-white/60 p-5 rounded-[2rem] shadow-2xl translate-y-24 opacity-0 transition-all duration-500 flex items-center space-x-3 pointer-events-none z-50">
+    <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+        <i class="fa-solid fa-check"></i>
+    </div>
+    <p class="text-sm font-bold text-slate-800" id="toast-msg">Đã cập nhật thành công!</p>
+</div>
+
+<!-- HỆ THỐNG ĐIỀU HƯỚNG TƯƠNG TÁC (JAVASCRIPT) -->
+<script>
+    // Hệ thống chuyển đổi Tab mượt mà tích hợp cập nhật class định dạng dọc mới
+    function switchTab(tabId) {
+        const tabs = ['timeline', 'events', 'footages', 'finance'];
+
+        tabs.forEach(t => {
+            const element = document.getElementById(`tab-content-${t}`);
+            const navBtn = document.getElementById(`nav-${t}`);
+
+            if (element) {
+                if (t === tabId) {
+                    element.classList.remove('hidden');
+                } else {
+                    element.classList.add('hidden');
+                }
+            }
+
+            if (navBtn) {
+                if (t === tabId) {
+                    navBtn.className = "nav-item-droplet nav-liquid-pill flex flex-col items-center justify-center space-y-2 p-5 w-full text-center transition-all duration-300 group text-[#7c4dff]";
+                } else {
+                    navBtn.className = "nav-item-droplet flex flex-col items-center justify-center space-y-2 p-5 w-full text-center transition-all duration-300 group text-slate-600 hover:text-[#7c4dff] hover:bg-white/40";
+                }
+            }
+        });
+
+        // Chuyển tiêu đề trang linh hoạt
+        const tabTitleMap = {
+            'timeline': 'New Feed',
+            'events': 'Events Portal',
+            'footages': 'Footages Storage',
+            'finance': 'Financial Hub'
+        };
+        document.getElementById('main-tab-title').innerText = tabTitleMap[tabId] || 'New Feed';
+
+        triggerToast(`Đang hiển thị phân mục: ${tabId.toUpperCase()}`);
+    }
+
+    // Đánh dấu hoặc bỏ lưu bài viết
+    function toggleStar(button) {
+        const icon = button.querySelector('i');
+        if (icon.classList.contains('fa-regular')) {
+            icon.className = 'fa-solid fa-star text-amber-500 text-lg scale-110';
+            button.classList.add('text-amber-500');
+            triggerToast('Đã lưu bài viết này vào danh sách yêu thích!');
+        } else {
+            icon.className = 'fa-regular fa-star text-lg';
+            button.classList.remove('text-amber-500');
+            triggerToast('Đã loại bỏ bài viết khỏi danh sách lưu trữ.');
+        }
+    }
+
+    // Xử lý đăng ký bản tin (Newsletter)
+    function handleSubscribe(event) {
+        event.preventDefault();
+        const emailInput = document.getElementById('newsletter-email');
+        triggerToast(`Chúc mừng! Email ${emailInput.value} đã được kết nối.`);
+        emailInput.value = '';
+    }
+
+    // Điều khiển Modal Yêu Cầu Footage
+    function openRequestModal() {
+        const modal = document.getElementById('request-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeRequestModal() {
+        const modal = document.getElementById('request-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function submitFootageRequest(event) {
+        event.preventDefault();
+        closeRequestModal();
+        triggerToast('Yêu cầu Footage mới đã được phê chuẩn gửi đi!');
+    }
+
+    // Điều khiển Modal Mời Cà phê
+    let selectedCoffeeAmount = 5;
+    function openCoffeeModal() {
+        const modal = document.getElementById('coffee-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeCoffeeModal() {
+        const modal = document.getElementById('coffee-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function selectCoffeeAmount(btn, amount) {
+        const buttons = btn.parentElement.querySelectorAll('button');
+        buttons.forEach(b => {
+            b.className = "py-3 bg-white/60 border-2 border-transparent hover:border-amber-400 rounded-2xl font-bold text-slate-700 transition";
+        });
+        btn.className = "py-3 bg-amber-50/70 border-2 border-amber-400 rounded-2xl font-bold text-slate-800 transition";
+        selectedCoffeeAmount = amount;
+    }
+
+    function confirmCoffeePayment() {
+        closeCoffeeModal();
+        triggerToast(`Cảm ơn sự đóng góp của bạn! Bạn đã gửi $${selectedCoffeeAmount} 💖`);
+    }
+
+    // Điều khiển Modal Mô phỏng các chức năng nâng cao (AI Toolkit Simulation)
+    function openSimulationModal(toolType) {
+        const modal = document.getElementById('simulation-modal');
+        const iconBox = document.getElementById('sim-icon-box');
+        const title = document.getElementById('sim-title');
+        const desc = document.getElementById('sim-desc');
+        const status = document.getElementById('sim-status');
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        // Thiết lập trạng thái chờ xử lý ban đầu
+        status.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i><span>Đang xử lý thuật toán...</span>`;
+        status.className = "text-indigo-600 flex items-center gap-1";
+
+        if (toolType === 'AI Enhancer') {
+            iconBox.className = "w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-indigo-500/20";
+            iconBox.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i>`;
+            title.innerText = "Trình Nâng Cấp AI Video";
+            desc.innerText = "Thuật toán AI tự động tái cấu trúc điểm ảnh, phục hồi chi tiết, khử nhiễu và chuyển đổi file thô sang chất lượng 4K UHD.";
+        } else if (toolType === 'Cinematic Grading') {
+            iconBox.className = "w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg bg-gradient-to-tr from-pink-500 to-rose-500 shadow-pink-500/20";
+            iconBox.innerHTML = `<i class="fa-solid fa-palette"></i>`;
+            title.innerText = "Bộ Lọc Cinematic LUTs";
+            desc.innerText = "Áp các bảng màu chuyên nghiệp Hollywood trực tiếp lên tư liệu cảnh quay để tăng cường độ tương phản tự nhiên.";
+        } else if (toolType === 'Secure Source Check') {
+            iconBox.className = "w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg bg-gradient-to-tr from-emerald-500 to-teal-500 shadow-emerald-500/20";
+            iconBox.innerHTML = `<i class="fa-solid fa-shield-halved"></i>`;
+            title.innerText = "Xác Minh Bản Quyền";
+            desc.innerText = "Kiểm tra chữ ký số gốc từ máy ảnh tác nghiệp của phóng viên, đảm bảo tính chân thực và tính toàn vẹn của dữ liệu tin tức.";
+        }
+
+        // Hoàn tất tiến trình giả lập sau 2 giây
+        setTimeout(() => {
+            status.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>Hoàn thành xuất sắc!</span>`;
+            status.className = "text-emerald-500 flex items-center gap-1";
+            triggerToast(`${title.innerText} đã chạy xong.`);
+        }, 2000);
+    }
+
+    function closeSimulationModal() {
+        const modal = document.getElementById('simulation-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // Kích hoạt thông báo hệ thống Toast mềm mại góc dưới phải
+    function triggerToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-msg').innerText = msg;
+        toast.classList.remove('translate-y-24', 'opacity-0');
+        setTimeout(() => {
+            toast.classList.add('translate-y-24', 'opacity-0');
+        }, 3000);
+    }
+
+    // Phát tín hiệu khi khởi tạo giao diện
+    window.onload = () => triggerToast("Bản vẽ Glimpz Premium Liquid đã thiết lập! ✨");
+</script>
+</body>
+</html>
