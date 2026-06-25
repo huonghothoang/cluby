@@ -8,33 +8,29 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+
+import view.format; // Gọi thư viện tái chế UI
 
 public class dashboard extends ScrollPane {
 
-    // Kho lưu trữ dữ liệu State: Bao gồm tên CLB, các thông số trạng thái, sự kiện và tài chính. Hiện là dữ liệu giả, đóng vai trò bản lề cho việc tích hợp Database về sau.
+    // Dữ liệu nội tại
     private String clubName = "CLB Glimpz Hub";
     private String headerTitlePrefix = "Tổng quát về ";
 
     private String stat1Title = "Thành viên";
     private String membersCount = "128";
-
     private String stat2Title = "Sự kiện";
     private String eventsCount = "14";
-
     private String stat3Title = "Quỹ CLB";
     private String fundCount = "15.800.000đ";
-
     private String stat4Title = "Đơn ứng tuyển";
     private String applicationsCount = "23 đơn";
 
     private String eventSectionTitle = "⏰ Hoạt động sắp tới";
-
     private String event1Cat = "Kỹ thuật & Công nghệ";
     private String event1Name = "WORKSHOP GITHUB & GIT FLOW";
     private String event1Date = "28/06/2026";
@@ -69,13 +65,10 @@ public class dashboard extends ScrollPane {
     private String financeSectionTitle = "💰 Báo cáo Tài chính";
     private String finStat1Title = "Quỹ hiện tại";
     private String financeCurrent = "15.800.000đ";
-
     private String finStat2Title = "Thu tháng này";
     private String financeIncome = "+3.500.000đ";
-
     private String finStat3Title = "Chi tháng này";
     private String financeExpense = "-1.200.000đ";
-
     private String finStat4Title = "Chờ duyệt";
     private String financePending = "500.000đ";
 
@@ -84,55 +77,41 @@ public class dashboard extends ScrollPane {
     private String trans1Name = "Thu hội phí";
     private String trans1Amount = "+1.200.000đ";
     private boolean trans1IsIncome = true;
-
     private String trans2Date = "27/06";
     private String trans2Name = "Chi in banner quảng cáo";
     private String trans2Amount = "-350.000đ";
     private boolean trans2IsIncome = false;
-
     private String trans3Date = "25/06";
     private String trans3Name = "Nhà tài trợ ABC rót vốn";
     private String trans3Amount = "+2.000.000đ";
     private boolean trans3IsIncome = true;
 
     public dashboard() {
-        // Setup Component cha: Khởi tạo một cuộn VBox đóng vai trò nền tảng chứa toàn bộ các khối nội dung của bảng điều khiển.
         VBox mainContent = new VBox(32);
         mainContent.setPadding(new Insets(32));
         mainContent.setStyle("-fx-background-color: transparent;");
 
-        styleScrollbar(this, mainContent, 12);
+        format.formatScrollbar(this, mainContent, 12);
 
         mainContent.getChildren().addAll(
-                buildHeader(),
-                buildStatsRow(),
-                buildMiddleRow(),
-                buildPersonnelRow(),
-                buildFinanceRow()
+                buildHeader(), buildStatsRow(), buildMiddleRow(), buildPersonnelRow(), buildFinanceRow()
         );
-
         this.setContent(mainContent);
     }
 
-    // Các hàm lắp ráp Layout (Builders): Lắp ghép các thẻ giao diện đã được format hóa vào chung một hàng ngang (HBox) hoặc dọc (VBox).
+    // Các hàm xây dựng Bố cục (Layout Builders)
     private HBox buildHeader() {
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
+        Label mainTitle = format.formatLabel(headerTitlePrefix + clubName, FontWeight.BLACK, 28, "#1e293b");
 
-        Label mainTitle = createStyledLabel(headerTitlePrefix + clubName, FontWeight.BLACK, 28, "#1e293b");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Button btnNotif = new Button("🔔");
-        btnNotif.setStyle(
-                "-fx-background-color: linear-gradient(to bottom right, #7c4dff, #448aff); -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 50%; -fx-min-width: 44px; -fx-min-height: 44px; -fx-effect: dropshadow(three-pass-box, rgba(124,77,255,0.4), 10, 0.3, 0, 4); -fx-cursor: hand;"
-        );
+        btnNotif.setStyle("-fx-background-color: linear-gradient(to bottom right, #7c4dff, #448aff); -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 50%; -fx-min-width: 44px; -fx-min-height: 44px; -fx-effect: dropshadow(three-pass-box, rgba(124,77,255,0.4), 10, 0.3, 0, 4); -fx-cursor: hand;");
         btnNotif.setOnMouseEntered(e -> { btnNotif.setScaleX(1.05); btnNotif.setScaleY(1.05); });
         btnNotif.setOnMouseExited(e -> { btnNotif.setScaleX(1.0); btnNotif.setScaleY(1.0); });
-
-        btnNotif.setOnAction(e -> {
-            System.out.println("Sự kiện click: Chuyển hướng sang trang Thông báo!");
-        });
 
         header.getChildren().addAll(mainTitle, spacer, btnNotif);
         return header;
@@ -157,11 +136,11 @@ public class dashboard extends ScrollPane {
     private HBox buildMiddleRow() {
         HBox row = new HBox(24);
 
-        VBox leftCol = createLiquidCard();
+        VBox leftCol = format.formatBoxCard();
         HBox.setHgrow(leftCol, Priority.ALWAYS);
         leftCol.setPrefWidth(700);
 
-        Label leftTitle = createStyledLabel(eventSectionTitle, FontWeight.BLACK, 18, "#1e293b");
+        Label leftTitle = format.formatLabel(eventSectionTitle, FontWeight.BLACK, 18, "#1e293b");
 
         VBox eventsList = new VBox(16);
         eventsList.getChildren().addAll(
@@ -172,27 +151,23 @@ public class dashboard extends ScrollPane {
 
         ScrollPane eventsScroll = new ScrollPane(eventsList);
         eventsScroll.setPrefHeight(280);
-        styleScrollbar(eventsScroll, eventsList, 16);
+        format.formatScrollbar(eventsScroll, eventsList, 16);
 
         leftCol.getChildren().addAll(leftTitle, eventsScroll);
 
-        VBox rightCol = createLiquidCard();
+        VBox rightCol = format.formatBoxCard();
         rightCol.setPrefWidth(550);
 
-        Label rightTitle = createStyledLabel(notifSectionTitle, FontWeight.BLACK, 18, "#1e293b");
-
+        Label rightTitle = format.formatLabel(notifSectionTitle, FontWeight.BLACK, 18, "#1e293b");
         VBox notifList = new VBox(12);
         notifList.getChildren().addAll(
-                createNotifRow(notif1, "#6366f1"),
-                createNotifRow(notif2, "#ec4899"),
-                createNotifRow(notif3, "#f59e0b"),
-                createNotifRow(notif4, "#ef4444"),
-                createNotifRow(notif5, "#3b82f6")
+                createNotifRow(notif1, "#6366f1"), createNotifRow(notif2, "#ec4899"),
+                createNotifRow(notif3, "#f59e0b"), createNotifRow(notif4, "#ef4444"), createNotifRow(notif5, "#3b82f6")
         );
 
         ScrollPane notifScroll = new ScrollPane(notifList);
         notifScroll.setPrefHeight(280);
-        styleScrollbar(notifScroll, notifList, 16);
+        format.formatScrollbar(notifScroll, notifList, 16);
 
         rightCol.getChildren().addAll(rightTitle, notifScroll);
         row.getChildren().addAll(leftCol, rightCol);
@@ -200,10 +175,10 @@ public class dashboard extends ScrollPane {
     }
 
     private VBox buildPersonnelRow() {
-        VBox rowCard = createLiquidCard();
+        VBox rowCard = format.formatBoxCard();
         HBox.setHgrow(rowCard, Priority.ALWAYS);
 
-        Label title = createStyledLabel(personnelSectionTitle, FontWeight.BLACK, 18, "#1e293b");
+        Label title = format.formatLabel(personnelSectionTitle, FontWeight.BLACK, 18, "#1e293b");
 
         HBox content = new HBox(60);
         content.setAlignment(Pos.CENTER);
@@ -211,30 +186,23 @@ public class dashboard extends ScrollPane {
 
         PieChart chart = new PieChart();
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
-                new PieChart.Data("Truyền thông", 35),
-                new PieChart.Data("Kỹ thuật", 28),
-                new PieChart.Data("Sự kiện", 30),
-                new PieChart.Data("Nhân sự", 20)
+                new PieChart.Data("Truyền thông", 35), new PieChart.Data("Kỹ thuật", 28),
+                new PieChart.Data("Sự kiện", 30), new PieChart.Data("Nhân sự", 20)
         );
         chart.setData(pieChartData);
-        chart.setLabelsVisible(true);
-        chart.setLegendVisible(true);
+        chart.setLabelsVisible(true); chart.setLegendVisible(true);
         chart.setPrefSize(400, 300);
-
-        String pieChartCss = ".chart-legend { -fx-background-color: transparent; } .chart-legend-item { -fx-text-fill: #1e293b; }";
-        chart.getStylesheets().add("data:text/css," + pieChartCss.replaceAll(" ", "%20"));
+        chart.getStylesheets().add("data:text/css," + ".chart-legend { -fx-background-color: transparent; } .chart-legend-item { -fx-text-fill: #1e293b; }".replaceAll(" ", "%20"));
 
         VBox deptsList = new VBox(12);
         deptsList.getChildren().addAll(
-                createDeptStat("📢 Truyền thông", deptMedia),
-                createDeptStat("💻 Kỹ thuật", deptTech),
-                createDeptStat("🎪 Sự kiện", deptEvent),
-                createDeptStat("👥 Nhân sự", deptHR)
+                createDeptStat("📢 Truyền thông", deptMedia), createDeptStat("💻 Kỹ thuật", deptTech),
+                createDeptStat("🎪 Sự kiện", deptEvent), createDeptStat("👥 Nhân sự", deptHR)
         );
 
         ScrollPane deptsScroll = new ScrollPane(deptsList);
         deptsScroll.setPrefHeight(300);
-        styleScrollbar(deptsScroll, deptsList, 16);
+        format.formatScrollbar(deptsScroll, deptsList, 16);
         HBox.setHgrow(deptsScroll, Priority.ALWAYS);
 
         content.getChildren().addAll(chart, deptsScroll);
@@ -243,13 +211,14 @@ public class dashboard extends ScrollPane {
     }
 
     private VBox buildFinanceRow() {
-        VBox finCol = createLiquidCard();
+        VBox finCol = format.formatBoxCard();
         HBox.setHgrow(finCol, Priority.ALWAYS);
         finCol.setMaxWidth(Double.MAX_VALUE);
 
         HBox finHeader = new HBox(12);
         finHeader.setAlignment(Pos.CENTER_LEFT);
-        Label finTitle = createStyledLabel(financeSectionTitle, FontWeight.BLACK, 18, "#1e293b");
+        Label finTitle = format.formatLabel(financeSectionTitle, FontWeight.BLACK, 18, "#1e293b");
+
         Region fSpacer = new Region();
         HBox.setHgrow(fSpacer, Priority.ALWAYS);
         Button btnAddFin = new Button("Thêm giao dịch");
@@ -269,7 +238,7 @@ public class dashboard extends ScrollPane {
         finCC.setPercentWidth(25);
         finStatsGrid.getColumnConstraints().addAll(finCC, finCC, finCC, finCC);
 
-        Label transTitle = createStyledLabel(transSectionTitle, FontWeight.BOLD, 12, "#64748b");
+        Label transTitle = format.formatLabel(transSectionTitle, FontWeight.BOLD, 12, "#64748b");
 
         VBox transList = new VBox(8);
         transList.getChildren().addAll(
@@ -279,15 +248,15 @@ public class dashboard extends ScrollPane {
         );
         ScrollPane transScroll = new ScrollPane(transList);
         transScroll.setPrefHeight(180);
-        styleScrollbar(transScroll, transList, 16);
+        format.formatScrollbar(transScroll, transList, 16);
 
         finCol.getChildren().addAll(finHeader, finStatsGrid, transTitle, transScroll);
         return finCol;
     }
 
-    // Các hàm tái chế Card (Card Factories): Khởi tạo từng đối tượng phần tử giao diện lẻ (VBox/HBox) kèm dữ liệu linh động.
+    // Các hàm tạo Card riêng lẻ
     private VBox createStatCard(String title, String value, String titleColor, String valColor, String iconBg, String iconEmoji) {
-        VBox box = createLiquidCard();
+        VBox box = format.formatBoxCard();
         box.setPadding(new Insets(20));
         box.setMinHeight(Region.USE_PREF_SIZE);
 
@@ -295,19 +264,13 @@ public class dashboard extends ScrollPane {
         content.setAlignment(Pos.CENTER_LEFT);
 
         VBox textCol = new VBox(4);
-        textCol.getChildren().addAll(
-                createStyledLabel(title, FontWeight.BOLD, 12, titleColor),
-                createStyledLabel(value, FontWeight.BLACK, 28, valColor)
-        );
+        textCol.getChildren().addAll(format.formatLabel(title, FontWeight.BOLD, 12, titleColor), format.formatLabel(value, FontWeight.BLACK, 28, valColor));
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         StackPane iconContainer = new StackPane();
-        iconContainer.getChildren().addAll(
-                new Circle(24, Color.web(iconBg)),
-                createStyledLabel(iconEmoji, FontWeight.NORMAL, 20, "#000000")
-        );
+        iconContainer.getChildren().addAll(new Circle(24, Color.web(iconBg)), format.formatLabel(iconEmoji, FontWeight.NORMAL, 20, "#000000"));
 
         content.getChildren().addAll(textCol, spacer, iconContainer);
         box.getChildren().add(content);
@@ -317,11 +280,11 @@ public class dashboard extends ScrollPane {
     private VBox createEventCard(String category, String title, String date, String loc, String reg) {
         VBox box = new VBox(12);
         box.setPadding(new Insets(20));
-        applyGlassStyle(box, 24, 0.6);
+        format.formatGlass(box, 24, 0.6);
         box.setMaxWidth(Double.MAX_VALUE);
         VBox.setVgrow(box, Priority.ALWAYS);
 
-        Label lblTitle = createStyledLabel(title, FontWeight.BOLD, 16, "#1e293b");
+        Label lblTitle = format.formatLabel(title, FontWeight.BOLD, 16, "#1e293b");
         lblTitle.setWrapText(true);
 
         HBox statsRow = new HBox(32);
@@ -331,30 +294,27 @@ public class dashboard extends ScrollPane {
                 createMiniStat("Đăng ký", reg, "#7c4dff")
         );
 
-        box.getChildren().addAll(createBadge(category, "#1e293b", "rgba(124,77,255,0.15)", "#7c4dff"), lblTitle, statsRow);
+        box.getChildren().addAll(format.formatBadge(category, "rgba(124,77,255,0.15)", "#7c4dff"), lblTitle, statsRow);
         return box;
     }
 
     private VBox createMiniStat(String title, String val, String valColor) {
         VBox box = new VBox(2);
         box.setMinHeight(Region.USE_PREF_SIZE);
-        Label lblV = createStyledLabel(val, FontWeight.BOLD, 12, valColor);
+        Label lblV = format.formatLabel(val, FontWeight.BOLD, 12, valColor);
         lblV.setWrapText(true);
-        box.getChildren().addAll(createStyledLabel(title.toUpperCase(), FontWeight.BOLD, 9, "#94a3b8"), lblV);
+        box.getChildren().addAll(format.formatLabel(title.toUpperCase(), FontWeight.BOLD, 9, "#94a3b8"), lblV);
         return box;
     }
 
     private VBox createDeptStat(String name, String count) {
         VBox box = new VBox(4);
         box.setPadding(new Insets(16));
-        applyGlassStyle(box, 16, 0.4);
+        format.formatGlass(box, 16, 0.4);
         box.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         box.setMaxWidth(Double.MAX_VALUE);
 
-        box.getChildren().addAll(
-                createStyledLabel(name, FontWeight.BOLD, 12, "#64748b"),
-                createStyledLabel(count, FontWeight.BLACK, 16, "#1e293b")
-        );
+        box.getChildren().addAll(format.formatLabel(name, FontWeight.BOLD, 12, "#64748b"), format.formatLabel(count, FontWeight.BLACK, 16, "#1e293b"));
         return box;
     }
 
@@ -362,15 +322,15 @@ public class dashboard extends ScrollPane {
         VBox box = new VBox(4);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(16));
-        applyGlassStyle(box, 16, 0.6);
+        format.formatGlass(box, 16, 0.6);
         box.setMaxWidth(Double.MAX_VALUE);
         box.setMinHeight(Region.USE_PREF_SIZE);
         GridPane.setHgrow(box, Priority.ALWAYS);
 
-        Label lblV = createStyledLabel(val, FontWeight.BLACK, 16, valColor);
+        Label lblV = format.formatLabel(val, FontWeight.BLACK, 16, valColor);
         lblV.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        box.getChildren().addAll(createStyledLabel(title.toUpperCase(), FontWeight.BOLD, 10, "#94a3b8"), lblV);
+        box.getChildren().addAll(format.formatLabel(title.toUpperCase(), FontWeight.BOLD, 10, "#94a3b8"), lblV);
         return box;
     }
 
@@ -378,20 +338,20 @@ public class dashboard extends ScrollPane {
         HBox box = new HBox(12);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(12, 16, 12, 16));
-        applyGlassStyle(box, 16, 0.4);
+        format.formatGlass(box, 16, 0.4);
         box.setMaxWidth(Double.MAX_VALUE);
         box.setMinHeight(Region.USE_PREF_SIZE);
 
-        Label lblD = createStyledLabel(date, FontWeight.BOLD, 11, "#94a3b8");
+        Label lblD = format.formatLabel(date, FontWeight.BOLD, 11, "#94a3b8");
         lblD.setMinWidth(40);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label lblA = createStyledLabel(amount, FontWeight.BLACK, 13, isIncome ? "#10b981" : "#f43f5e");
+        Label lblA = format.formatLabel(amount, FontWeight.BLACK, 13, isIncome ? "#10b981" : "#f43f5e");
         lblA.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        box.getChildren().addAll(lblD, createStyledLabel(name, FontWeight.BOLD, 12, "#1e293b"), spacer, lblA);
+        box.getChildren().addAll(lblD, format.formatLabel(name, FontWeight.BOLD, 12, "#1e293b"), spacer, lblA);
         return box;
     }
 
@@ -399,77 +359,15 @@ public class dashboard extends ScrollPane {
         HBox box = new HBox(12);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(16));
-        applyGlassStyle(box, 16, 0.6);
+        format.formatGlass(box, 16, 0.6);
         box.setMaxWidth(Double.MAX_VALUE);
         box.setMinHeight(Region.USE_PREF_SIZE);
 
-        Label content = createStyledLabel(text, FontWeight.NORMAL, 13, "#334155");
+        Label content = format.formatLabel(text, FontWeight.NORMAL, 13, "#334155");
         content.setWrapText(true);
         HBox.setHgrow(content, Priority.ALWAYS);
 
         box.getChildren().addAll(new Circle(4, Color.web(dotColor)), content);
         return box;
-    }
-
-    // Các hàm tái chế Format (Format Utilities): Quản lý tập trung các thông số liên quan đến Style (màu, CSS, đổ bóng,...) để giảm thiểu việc code lặp lại.
-    private Label createStyledLabel(String text, FontWeight weight, int size, String hexColor) {
-        Label lbl = new Label(text);
-        lbl.setFont(Font.font("Google Sans", weight, size));
-        lbl.setTextFill(Color.web(hexColor));
-        return lbl;
-    }
-
-    private void applyGlassStyle(Region region, int radius, double opacity) {
-        region.setStyle(
-                "-fx-background-color: rgba(255,255,255," + opacity + ");" +
-                        "-fx-background-radius: " + radius + "px;" +
-                        "-fx-border-color: white;" +
-                        "-fx-border-radius: " + radius + "px;"
-        );
-    }
-
-    private Label createBadge(String text, String borderColor, String bgColor, String textColor) {
-        Label badge = new Label(text);
-        badge.setStyle(
-                "-fx-background-color: " + bgColor + ";" +
-                        "-fx-text-fill: " + textColor + ";" +
-                        "-fx-font-size: 10px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-padding: 4 10 4 10;" +
-                        "-fx-background-radius: 12px;"
-        );
-        return badge;
-    }
-
-    private VBox createLiquidCard() {
-        VBox box = new VBox(20);
-        box.setPadding(new Insets(28));
-        box.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.42);" +
-                        "-fx-background-radius: 40px;" +
-                        "-fx-border-color: rgba(255, 255, 255, 0.65);" +
-                        "-fx-border-width: 1px;" +
-                        "-fx-border-radius: 40px;"
-        );
-        box.setEffect(new DropShadow(30, 0, 15, Color.web("#7c4dff", 0.08)));
-        return box;
-    }
-
-    // Ghi đè CSS thông qua text/css nội tuyến: Thay đổi kích thước (độ dày 12px, chiều dài tối đa 20px) và ẩn đi các thành phần rãnh cuộn mặc định.
-    private void styleScrollbar(ScrollPane scrollPane, VBox contentBox, int paddingRight) {
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;");
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        contentBox.setPadding(new Insets(0, paddingRight, 0, 0));
-
-        String css = ".scroll-pane > .viewport { -fx-background-color: transparent; } " +
-                ".scroll-bar:vertical { -fx-background-color: transparent; -fx-pref-width: 12px; } " +
-                ".scroll-bar:vertical .track { -fx-background-color: transparent; } " +
-                ".scroll-bar:vertical .thumb { -fx-background-color: rgba(124,77,255,0.4); -fx-background-radius: 10px; -fx-max-height: 20px; } " +
-                ".scroll-bar:vertical .thumb:hover { -fx-background-color: rgba(124,77,255,0.8); } " +
-                ".scroll-bar:vertical .increment-button, .scroll-bar:vertical .decrement-button { -fx-padding: 0; }";
-
-        scrollPane.getStylesheets().add("data:text/css," + css.replaceAll(" ", "%20"));
     }
 }
