@@ -1,4 +1,4 @@
-package view;
+package view.president;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -8,7 +8,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.BoxBlur;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
@@ -27,14 +26,14 @@ import javafx.stage.Stage;
 import javafx.animation.*;
 import javafx.util.Duration;
 
-// wutisit: Thư viện xử lý thời gian thực cho đồng hồ
+// Thư viện xử lý thời gian thực cho đồng hồ
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class frame extends Application {
 
-    // canbereuse: Mẫu Singleton để gọi frame.getInstance()... từ file khác
+    // Mẫu Singleton để truy xuất frame từ các class khác
     private static frame instance;
 
     public static frame getInstance() {
@@ -47,20 +46,23 @@ public class frame extends Application {
     private VBox toastContainer;
     private DropShadow mainShadow;
 
-    // wutisit: Các biến lưu trữ vùng chứa để thao tác đổi view sau này
+    // Các biến lưu trữ vùng chứa UI chính để thao tác đổi view
     private Label mainTitle;
     private StackPane viewContainer;
 
-    // wutisit: Mảng lưu toàn bộ nút điều hướng để dễ quản lý trạng thái Active
+    // Mảng lưu toàn bộ nút điều hướng để quản lý trạng thái Active
     private Button[] allNavButtons;
     private Button activeNavBtn = null;
+
+    // Biến lưu tên user hiện tại, cần cập nhật lại khi có chức năng login
+    private String currentUserName = "Alexandra";
 
     @Override
     public void start(Stage primaryStage) {
         instance = this;
         rootPane = new StackPane();
 
-        // --- 1. PHẦN NỀN ---
+        // Khởi tạo phần nền Gradient và hiệu ứng bong bóng chuyển động
         Pane backgroundPane = new Pane();
         Stop[] stops = new Stop[] {
                 new Stop(0.0, Color.web("#d3dbf4")),
@@ -110,7 +112,7 @@ public class frame extends Application {
 
         rootPane.getChildren().add(backgroundPane);
 
-        // --- 2. KHUNG KÍNH MỜ CHÍNH ---
+        // Khung kính mờ chứa giao diện chính
         mainLayout = new HBox();
         mainLayout.setMaxSize(1300, 750);
         mainLayout.setPrefSize(1300, 750);
@@ -131,10 +133,8 @@ public class frame extends Application {
         mainShadow.setOffsetY(16);
         mainLayout.setEffect(mainShadow);
 
-        // --- 3. SIDEBAR ---
+        // Thiết lập Sidebar
         VBox sidebar = new VBox();
-
-        // canbeimprove: Giảm độ rộng 20% (từ 240px -> 192px)
         sidebar.setPrefWidth(192); sidebar.setMinWidth(192); sidebar.setMaxWidth(192);
         sidebar.setPadding(new Insets(24, 16, 24, 16));
         sidebar.setStyle(
@@ -149,7 +149,6 @@ public class frame extends Application {
         logoBox.setAlignment(Pos.CENTER);
         logoBox.setPadding(new Insets(0, 0, 24, 0));
 
-        // URL trực tiếp tới ảnh Google Drive (đã đổi format view -> uc?id=)
         String appLogoUrl = "cluby.png";
 
         StackPane logoImgContainer = new StackPane();
@@ -160,7 +159,6 @@ public class frame extends Application {
         appLogo.setFitHeight(44);
         appLogo.setPreserveRatio(true);
 
-        // Cắt ảnh logo cho bo góc (tùy chọn, để đồng bộ UI cũ)
         Rectangle clip = new Rectangle(44, 44);
         clip.setArcWidth(16);
         clip.setArcHeight(16);
@@ -179,7 +177,7 @@ public class frame extends Application {
         clockLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         clockLabel.setAlignment(Pos.CENTER);
 
-        // wutisit: Dòng chào mừng tự động đổi theo thời gian thực
+        // Lời chào tự động cập nhật theo múi giờ
         Label greetingLabel = new Label();
         greetingLabel.setFont(Font.font("Google Sans", FontWeight.BOLD, 11));
         greetingLabel.setTextFill(Color.web("#7c4dff"));
@@ -190,33 +188,32 @@ public class frame extends Application {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss\nEEEE, dd/MM/yyyy", new Locale("vi", "VN"));
             clockLabel.setText(now.format(formatter));
 
-            // Logic đổi lời chào dựa theo múi giờ
             int hour = now.getHour();
             if (hour >= 4 && hour < 10) {
-                greetingLabel.setText("Chào buổi sáng, Alexandra!");
+                greetingLabel.setText("Chào buổi sáng, " + currentUserName + "!");
             } else if (hour >= 10 && hour < 13) {
-                greetingLabel.setText("Chào buổi trưa, Alexandra!");
+                greetingLabel.setText("Chào buổi trưa, " + currentUserName + "!");
             } else if (hour >= 13 && hour < 18) {
-                greetingLabel.setText("Chào buổi chiều, Alexandra!");
+                greetingLabel.setText("Chào buổi chiều, " + currentUserName + "!");
             } else if (hour >= 18 && hour < 23) {
-                greetingLabel.setText("Chào buổi tối, Alexandra!");
+                greetingLabel.setText("Chào buổi tối, " + currentUserName + "!");
             } else {
-                greetingLabel.setText("Đã khuya rồi, Alexandra!");
+                greetingLabel.setText("Đã khuya rồi, " + currentUserName + "!");
             }
         }), new KeyFrame(Duration.seconds(1)));
+
         clock.setCycleCount(Animation.INDEFINITE);
         clock.play();
 
         logoBox.getChildren().addAll(logoImgContainer, logoTitle, clockLabel, greetingLabel);
 
-        // --- DANH SÁCH MENU HOVER ---
+        // Danh sách Menu điều hướng
         VBox navList = new VBox(4);
         navList.setAlignment(Pos.TOP_CENTER);
 
-        // Nút Tổng quan - "Chung"
         Button navDashboard = createNavButton("🏠", "Chung", true, false);
 
-        // --- Nhóm: NHÂN SỰ ---
+        // Menu nhóm Nhân sự
         VBox hrGroup = new VBox(0);
         Button navHR = createNavButton("👥", "Nhân sự", false, false);
 
@@ -240,7 +237,7 @@ public class frame extends Application {
             hrSubMenu.setVisible(false);
         });
 
-        // --- Nhóm: HOẠT ĐỘNG ---
+        // Menu nhóm Hoạt động
         VBox actGroup = new VBox(0);
         Button navActivities = createNavButton("📅", "Hoạt động", false, false);
 
@@ -264,7 +261,6 @@ public class frame extends Application {
             actSubMenu.setVisible(false);
         });
 
-        // Các nút đơn giản còn lại
         Button navFinance = createNavButton("💰", "Tài chính", false, false);
         Button navNotif = createNavButton("📢", "Thông báo", false, false);
         Button navReports = createNavButton("📊", "Báo cáo", false, false);
@@ -276,7 +272,6 @@ public class frame extends Application {
                 navFinance, navNotif, navReports, navAccount
         };
 
-        // Gắn các cụm vào thanh sidebar
         navList.getChildren().addAll(navDashboard, hrGroup, actGroup, navFinance, navNotif, navReports, navAccount);
 
         for (Button btn : allNavButtons) {
@@ -289,7 +284,7 @@ public class frame extends Application {
             });
         }
 
-        // --- HỒ SƠ & BUTTON ĐĂNG XUẤT ---
+        // Khu vực hiển thị thông tin người dùng & Đăng xuất
         Region sidebarSpacer = new Region();
         VBox.setVgrow(sidebarSpacer, Priority.ALWAYS);
 
@@ -304,8 +299,8 @@ public class frame extends Application {
 
         HBox userActions = new HBox(8);
         userActions.setAlignment(Pos.CENTER);
-
         Button btnLogout = new Button("🚪");
+
         btnLogout.setPrefSize(44, 44);
         btnLogout.setStyle(
                 "-fx-background-color: #ef4444;" +
@@ -316,19 +311,19 @@ public class frame extends Application {
                         "-fx-cursor: hand;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(239,68,68,0.5), 10, 0.4, 0, 4);"
         );
+
         btnLogout.setOnMouseEntered(e -> { btnLogout.setScaleX(1.1); btnLogout.setScaleY(1.1); });
         btnLogout.setOnMouseExited(e -> { btnLogout.setScaleX(1.0); btnLogout.setScaleY(1.0); });
         btnLogout.setOnAction(e -> openLogoutModal());
 
         Button btnAvatar = new Button();
         btnAvatar.setPrefSize(44, 44);
-
         ImageView userImg = new ImageView(new Image("trish.jpeg"));
         userImg.setFitWidth(44); userImg.setFitHeight(44);
         userImg.setPreserveRatio(false);
         userImg.setClip(new Circle(22, 22, 22));
-
         btnAvatar.setGraphic(userImg);
+
         btnAvatar.setStyle(
                 "-fx-background-color: transparent;" +
                         "-fx-padding: 0;" +
@@ -336,24 +331,25 @@ public class frame extends Application {
                         "-fx-background-radius: 22px;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.2), 10, 0.4, 0, 4);"
         );
+
         btnAvatar.setOnMouseEntered(e -> { btnAvatar.setScaleX(1.1); btnAvatar.setScaleY(1.1); });
         btnAvatar.setOnMouseExited(e -> { btnAvatar.setScaleX(1.0); btnAvatar.setScaleY(1.0); });
         btnAvatar.setOnAction(e -> triggerToast("Đang mở phần cài đặt..."));
 
         userActions.getChildren().addAll(btnLogout, btnAvatar);
 
-        Label userName = new Label("Alexandra");
+        Label userName = new Label(currentUserName);
         userName.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
         userName.setTextFill(Color.web("#1e293b"));
 
-        Label userRole = new Label("jobless hihi");
+        Label userRole = new Label("");
         userRole.setFont(Font.font("Google Sans", FontWeight.EXTRA_BOLD, 8));
         userRole.setTextFill(Color.web("#64748b"));
 
         userProfile.getChildren().addAll(userActions, userName, userRole);
         sidebar.getChildren().addAll(logoBox, navList, sidebarSpacer, userProfile);
 
-        // --- 4. MAIN AREA ---
+        // Vùng nội dung chính (Main Area)
         VBox mainArea = new VBox();
         HBox.setHgrow(mainArea, Priority.ALWAYS);
 
@@ -363,7 +359,6 @@ public class frame extends Application {
 
         VBox titleBox = new VBox(2);
 
-        // Cài đặt tên Tiêu đề mặc định khi mới mở App
         mainTitle = new Label("Nắm tình hình nào!");
         mainTitle.setFont(Font.font("Google Sans", FontWeight.BLACK, 32));
         mainTitle.setTextFill(Color.web("#1e293b"));
@@ -374,13 +369,12 @@ public class frame extends Application {
         Region topSpacer = new Region();
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
 
-        // Vùng chứa thanh công cụ bên phải (hiện tại trống do đã xoá Search và Button Footage)
         HBox topActions = new HBox(16);
         topActions.setAlignment(Pos.CENTER_RIGHT);
 
         topBar.getChildren().addAll(titleBox, topSpacer, topActions);
 
-        // --- 5. VÙNG VIEW ĐỘNG ---
+        // Vùng View động để render nội dung các tab khác
         viewContainer = new StackPane();
         viewContainer.setPadding(new Insets(0, 32, 32, 32));
         VBox.setVgrow(viewContainer, Priority.ALWAYS);
@@ -388,12 +382,12 @@ public class frame extends Application {
         mainArea.getChildren().addAll(topBar, viewContainer);
         mainLayout.getChildren().addAll(sidebar, mainArea);
 
-        // --- 6. OVERLAY CHỨA MODAL ---
+        // Lớp phủ overlay cho Modal
         modalOverlay = new StackPane();
-        modalOverlay.setStyle("-fx-background-color: rgb(57 0 216);");
+        modalOverlay.setStyle("-fx-background-color: rgb(57 0 216 / 0.1);"); // Màu nền phủ trong suốt nhẹ
         modalOverlay.setVisible(false);
 
-        // --- 7. TOAST NOTIFICATIONS ---
+        // Toast Container để chứa các thông báo pop-up
         toastContainer = new VBox(8);
         toastContainer.setMaxSize(300, 200);
         StackPane.setAlignment(toastContainer, Pos.BOTTOM_RIGHT);
@@ -402,17 +396,17 @@ public class frame extends Application {
         rootPane.getChildren().addAll(mainLayout, modalOverlay, toastContainer);
 
         Scene scene = new Scene(rootPane, 1366, 800);
-        primaryStage.setTitle("cluby"); // Cập nhật tên cửa sổ ứng dụng
+        primaryStage.setTitle("cluby");
 
-        // Cài đặt Window Icon để logo hiển thị trên taskbar và góc trên cửa sổ
         primaryStage.getIcons().add(new Image(appLogoUrl));
 
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        triggerToast("Cập nhật giờ tự động kích hoạt!");
+        triggerToast("Một ngày tốt lành, " + currentUserName + "!");
     }
 
+    // todo: Cập nhật component cho viewContainer khi chuyển tab
     public void setView(Node newView) {
         if (viewContainer != null) {
             viewContainer.getChildren().setAll(newView);
@@ -432,25 +426,21 @@ public class frame extends Application {
         setButtonActiveStyle(activeBtn);
         activeNavBtn = activeBtn;
 
-        // Nếu tiêu đề mục là "Chung", chuyển thành dòng ngầu ngầu
         if (title.equals("Chung")) {
             setMainTitle("Nắm tình hình nào!");
         } else {
             setMainTitle(title);
         }
-
         triggerToast("Đã đến " + title.toUpperCase());
     }
 
-    // canbereuse: Builder tuỳ biến tạo nút.
+    // Hàm khởi tạo UI cho nút điều hướng Sidebar
     private Button createNavButton(String emoji, String title, boolean isActive, boolean isSubItem) {
         Button btn = new Button();
         btn.setMaxWidth(Double.MAX_VALUE);
-
         btn.setPrefHeight(isSubItem ? 32 : 36);
         btn.setAlignment(Pos.CENTER_LEFT);
 
-        // Giảm padding trái đi đôi chút do tổng sidebar chỉ còn 192px
         if (isSubItem) {
             btn.setPadding(new Insets(6, 12, 6, 36));
         } else {
@@ -534,7 +524,7 @@ public class frame extends Application {
         }
     }
 
-    // --- HỆ THỐNG MODALS ---
+    // Xử lý logic Modal
     private void openLogoutModal() {
         modalOverlay.getChildren().clear();
         modalOverlay.getChildren().add(createLogoutModalBody());
@@ -542,11 +532,9 @@ public class frame extends Application {
     }
 
     private void showOverlay() {
+        // Chỉ làm nhòe màn hình, xóa bỏ tính năng làm tối màn hình theo yêu cầu
         GaussianBlur blur = new GaussianBlur(25);
-        ColorAdjust darken = new ColorAdjust();
-        darken.setBrightness(-0.4);
-        darken.setInput(blur);
-        mainLayout.setEffect(darken);
+        mainLayout.setEffect(blur);
         modalOverlay.setVisible(true);
 
         FadeTransition ft = new FadeTransition(Duration.millis(200), modalOverlay);
@@ -630,11 +618,10 @@ public class frame extends Application {
 
         actions.getChildren().addAll(btnCancel, btnLeave);
         box.getChildren().addAll(title, sub, actions);
-
         return box;
     }
 
-    // --- HỆ THỐNG THÔNG BÁO TOAST ---
+    // Hàm tạo hệ thống thông báo Toast (Pop-up báo cáo ngắn)
     public void triggerToast(String msg) {
         HBox toast = new HBox(12);
         toast.setAlignment(Pos.CENTER_LEFT);
