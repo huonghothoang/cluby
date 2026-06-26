@@ -23,8 +23,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import view.format;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -32,6 +32,8 @@ import java.util.Locale;
 public class frame extends Application {
 
     private static frame instance;
+
+    // Trả về thực thể duy nhất đang hoạt động của ứng dụng
     public static frame getInstance() { return instance; }
 
     private StackPane rootPane;
@@ -39,20 +41,19 @@ public class frame extends Application {
     private StackPane modalOverlay;
     private VBox toastContainer;
     private DropShadow mainShadow;
-
     private Label mainTitle;
     private StackPane viewContainer;
 
     private Button[] allNavButtons;
     private Button activeNavBtn = null;
-    private String currentUserName = "Alexandra";
+    private String currentUserName = "Hương";
 
+    // Thực hiện thiết lập cấu trúc nền, thanh điều hướng và khởi tạo cửa sổ chính của chương trình
     @Override
     public void start(Stage primaryStage) {
         instance = this;
         rootPane = new StackPane();
 
-        // Khởi tạo nền ảo ảnh (Gradient & Blur Orbs)
         Pane backgroundPane = new Pane();
         Stop[] stops = new Stop[] {
                 new Stop(0.0, Color.web("#d3dbf4")),
@@ -91,7 +92,6 @@ public class frame extends Application {
 
         rootPane.getChildren().add(backgroundPane);
 
-        // Khung hiển thị giao diện Glassmorphism
         mainLayout = new HBox();
         mainLayout.setMaxSize(1300, 750);
         mainLayout.setPrefSize(1300, 750);
@@ -100,7 +100,6 @@ public class frame extends Application {
         mainShadow = new DropShadow(45, 0, 16, Color.web("#311b92", 0.15));
         mainLayout.setEffect(mainShadow);
 
-        // Sidebar
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(192); sidebar.setMinWidth(192); sidebar.setMaxWidth(192);
         sidebar.setPadding(new Insets(24, 16, 24, 16));
@@ -134,6 +133,7 @@ public class frame extends Application {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss\nEEEE, dd/MM/yyyy", new Locale("vi", "VN"));
             clockLabel.setText(now.format(formatter));
+
             int hour = now.getHour();
             if (hour >= 4 && hour < 10) greetingLabel.setText("Chào buổi sáng, " + currentUserName + "!");
             else if (hour >= 10 && hour < 13) greetingLabel.setText("Chào buổi trưa, " + currentUserName + "!");
@@ -145,7 +145,6 @@ public class frame extends Application {
 
         logoBox.getChildren().addAll(logoImgContainer, logoTitle, clockLabel, greetingLabel);
 
-        // Nạp các nút điều hướng từ Format
         VBox navList = new VBox(4);
         navList.setAlignment(Pos.TOP_CENTER);
 
@@ -178,20 +177,19 @@ public class frame extends Application {
         actGroup.setOnMouseExited(e -> { actSubMenu.setManaged(false); actSubMenu.setVisible(false); });
 
         Button navFinance = createNavButton("💰", "Tài chính", false, false);
-        Button navNotif = createNavButton("📢", "Thông báo", false, false);
         Button navReports = createNavButton("📊", "Báo cáo", false, false);
-        Button navAccount = createNavButton("👤", "Tài khoản", false, false);
 
         allNavButtons = new Button[] {
                 navDashboard, navHR, navHRMembers, navHRDepts, navHRRecruit,
                 navActivities, navActEvents, navActAttendance, navActTasks,
-                navFinance, navNotif, navReports, navAccount
+                navFinance, navReports
         };
-        navList.getChildren().addAll(navDashboard, hrGroup, actGroup, navFinance, navNotif, navReports, navAccount);
 
-        // Module User dưới cùng
+        navList.getChildren().addAll(navDashboard, hrGroup, actGroup, navFinance, navReports);
+
         Region sidebarSpacer = new Region();
         VBox.setVgrow(sidebarSpacer, Priority.ALWAYS);
+
         VBox userProfile = new VBox(8);
         userProfile.setAlignment(Pos.CENTER);
         userProfile.setPadding(new Insets(12));
@@ -216,18 +214,20 @@ public class frame extends Application {
         btnAvatar.setStyle("-fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand; -fx-background-radius: 22px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.2), 10, 0.4, 0, 4);");
         btnAvatar.setOnMouseEntered(e -> { btnAvatar.setScaleX(1.1); btnAvatar.setScaleY(1.1); });
         btnAvatar.setOnMouseExited(e -> { btnAvatar.setScaleX(1.0); btnAvatar.setScaleY(1.0); });
-        btnAvatar.setOnAction(e -> triggerToast("Đang mở phần cài đặt..."));
+
+        btnAvatar.setOnAction(e -> switchTabFocus(null, "Hồ sơ cá nhân"));
 
         userActions.getChildren().addAll(btnLogout, btnAvatar);
 
         Label userName = format.formatLabel(currentUserName, FontWeight.BOLD, 12, "#1e293b");
         Label userRole = format.formatLabel("HỘI TRƯỞNG", FontWeight.EXTRA_BOLD, 8, "#64748b");
         userProfile.getChildren().addAll(userActions, userName, userRole);
+
         sidebar.getChildren().addAll(logoBox, navList, sidebarSpacer, userProfile);
 
-        // Vùng View Container
         VBox mainArea = new VBox();
         HBox.setHgrow(mainArea, Priority.ALWAYS);
+
         HBox topBar = new HBox();
         topBar.setPadding(new Insets(24, 32, 24, 32));
         topBar.setAlignment(Pos.CENTER_LEFT);
@@ -241,17 +241,18 @@ public class frame extends Application {
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
         HBox topActions = new HBox(16);
         topActions.setAlignment(Pos.CENTER_RIGHT);
+
         topBar.getChildren().addAll(titleBox, topSpacer, topActions);
 
         viewContainer = new StackPane();
         viewContainer.setPadding(new Insets(0, 32, 32, 32));
         VBox.setVgrow(viewContainer, Priority.ALWAYS);
+
         setView(new dashboard());
 
         mainArea.getChildren().addAll(topBar, viewContainer);
         mainLayout.getChildren().addAll(sidebar, mainArea);
 
-        // Lớp phủ hệ thống & Khu vực Toast
         modalOverlay = new StackPane();
         modalOverlay.setStyle("-fx-background-color: rgb(57 0 216 / 0.1);");
         modalOverlay.setVisible(false);
@@ -271,33 +272,43 @@ public class frame extends Application {
         triggerToast("Một ngày tốt lành, " + currentUserName + "!");
     }
 
+    // Thay thế phân vùng hiển thị nội dung trung tâm bằng giao diện của một chức năng mới
     public void setView(Node newView) {
         if (viewContainer != null) viewContainer.getChildren().setAll(newView);
     }
 
+    // Thay đổi chuỗi văn bản hiển thị tiêu đề chính của trang đang chọn
     public void setMainTitle(String title) {
         if (mainTitle != null) mainTitle.setText(title);
     }
 
-    // Điều hướng nội bộ hệ thống
+    // Xử lý chuyển đổi giao diện hiển thị, làm mới trạng thái nút bấm và cập nhật tiêu đề khi điều hướng tab
     public void switchTabFocus(Button activeBtn, String title) {
         for (Button btn : allNavButtons) {
             format.formatNavBtnInactive(btn);
         }
-        format.formatNavBtnActive(activeBtn);
+        if (activeBtn != null) {
+            format.formatNavBtnActive(activeBtn);
+        }
         activeNavBtn = activeBtn;
 
         switch (title) {
-            case "Chung": setMainTitle("Nắm tình hình nào!"); setView(new dashboard()); break;
-            case "Thành viên": setMainTitle(title); break;
-            case "Ban": setMainTitle(title); break;
-            case "Tuyển thành viên": setMainTitle(title); break;
+            case "Chung": { setMainTitle("Nắm tình hình nào!"); setView(new dashboard()); break; }
+            case "Thành viên": { setMainTitle(title); setView(new member()); break; }
+            case "Ban": { setMainTitle(title); setView(new department()); break; }
+            case "Tuyển thành viên": { setMainTitle(title); setView(new request()); break; }
+            case "Sự kiện": { setMainTitle(title); setView(new event()); break; }
+            case "Điểm danh": { setMainTitle(title); setView(new attendance()); break; }
+            case "Công việc": { setMainTitle(title); setView(new work()); break; }
+            case "Tài chính": { setMainTitle(title); setView(new finance()); break; }
+            case "Báo cáo": { setMainTitle(title); setView(new report()); break; }
+            case "Hồ sơ cá nhân": { setMainTitle(title); setView(new setting()); break; }
             default: setMainTitle(title); break;
         }
         triggerToast("Đã đến " + title.toUpperCase());
     }
 
-    // Dùng hàm khởi tạo Navigation Button tái chế từ format.java
+    // Khởi tạo một nút bấm điều hướng trên thanh sidebar bao gồm nhãn, hiệu ứng chuột và gán sự kiện chuyển tab
     private Button createNavButton(String emoji, String title, boolean isActive, boolean isSubItem) {
         Button btn = format.formatNavBtn(emoji, title, isSubItem);
         if (isActive) {
@@ -307,7 +318,6 @@ public class frame extends Application {
             format.formatNavBtnInactive(btn);
         }
 
-        // Không cho phép bấm nút danh mục gốc như Hoạt động, Nhân sự
         if(!title.equals("Nhân sự") && !title.equals("Hoạt động")) {
             btn.setOnAction(e -> switchTabFocus(btn, title));
         }
@@ -318,14 +328,16 @@ public class frame extends Application {
                 btn.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12px; -fx-border-color: transparent; -fx-border-width: 0px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.1), 10, 0.4, 0, 4); -fx-cursor: hand;");
             }
         });
+
         btn.setOnMouseExited(e -> {
             btn.setScaleX(1.0); btn.setScaleY(1.0);
             if (btn != activeNavBtn) format.formatNavBtnInactive(btn);
         });
+
         return btn;
     }
 
-    // Hiển thị và xử lý Modal: Dùng format.formatSimpleModal để khởi tạo bảng thông báo
+    // Hiển thị cửa sổ modal xác nhận thao tác rời khỏi hệ thống đi kèm hiệu ứng làm mờ giao diện chính
     private void openLogoutModal() {
         modalOverlay.getChildren().clear();
         modalOverlay.getChildren().add(
@@ -343,6 +355,20 @@ public class frame extends Application {
         ft.setFromValue(0); ft.setToValue(1); ft.play();
     }
 
+    // Kích hoạt hiển thị lớp phủ modal tùy chỉnh được truyền vào từ các phân hệ chức năng con
+    public void showCustomModal(Node modalContent) {
+        modalOverlay.getChildren().clear();
+        modalOverlay.getChildren().add(modalContent);
+
+        GaussianBlur blur = new GaussianBlur(25);
+        mainLayout.setEffect(blur);
+        modalOverlay.setVisible(true);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(200), modalOverlay);
+        ft.setFromValue(0); ft.setToValue(1); ft.play();
+    }
+
+    // Đóng lớp phủ modal hiện tại, khôi phục lại trạng thái sắc nét và tắt hiển thị vùng overlay
     public void closeOverlayModal() {
         FadeTransition ft = new FadeTransition(Duration.millis(200), modalOverlay);
         ft.setFromValue(1); ft.setToValue(0);
@@ -353,10 +379,11 @@ public class frame extends Application {
         ft.play();
     }
 
-    // Proxy Toast Notification trỏ tới format.java
+    // Đẩy một chuỗi thông báo nhanh dạng toast lên góc màn hình thông qua thư viện định dạng chung
     public void triggerToast(String msg) {
         format.formatToast(toastContainer, msg);
     }
 
+    // Điểm khởi chạy của chương trình để kích hoạt nền tảng JavaFX
     public static void main(String[] args) { launch(args); }
 }
