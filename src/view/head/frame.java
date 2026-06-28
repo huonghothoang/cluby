@@ -1,4 +1,4 @@
-package view.president;
+package view.head;
 
 import javafx.application.Application;
 import javafx.animation.*;
@@ -22,9 +22,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import view.finance;
-import view.format;
-import view.setting;
+import view.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,17 +41,16 @@ public class frame extends Application {
     private DropShadow mainShadow;
     private Label mainTitle;
     private StackPane viewContainer;
-
     private Button[] allNavButtons;
     private Button activeNavBtn = null;
-    private String currentUserName = "Hương";
+    private String currentUserName = "Nguyễn Văn A";
 
     @Override
     public void start(Stage primaryStage) {
         instance = this;
         rootPane = new StackPane();
-
         Pane backgroundPane = new Pane();
+
         Stop[] stops = new Stop[] {
                 new Stop(0.0, Color.web("#d3dbf4")),
                 new Stop(0.35, Color.web("#e8d6f5")),
@@ -95,7 +92,6 @@ public class frame extends Application {
         mainLayout.setMaxSize(1300, 750);
         mainLayout.setPrefSize(1300, 750);
         mainLayout.setStyle("-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
-
         mainShadow = new DropShadow(45, 0, 16, Color.web("#311b92", 0.15));
         mainLayout.setEffect(mainShadow);
 
@@ -111,6 +107,7 @@ public class frame extends Application {
 
         StackPane logoImgContainer = new StackPane();
         logoImgContainer.setPrefSize(44, 44); logoImgContainer.setMaxSize(44, 44);
+
         ImageView appLogo = new ImageView(new Image("cluby.png"));
         appLogo.setFitWidth(44); appLogo.setFitHeight(44);
         appLogo.setPreserveRatio(true);
@@ -132,7 +129,6 @@ public class frame extends Application {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss\nEEEE, dd/MM/yyyy", new Locale("vi", "VN"));
             clockLabel.setText(now.format(formatter));
-
             int hour = now.getHour();
             if (hour >= 4 && hour < 10) greetingLabel.setText("Chào buổi sáng, " + currentUserName + "!");
             else if (hour >= 10 && hour < 13) greetingLabel.setText("Chào buổi trưa, " + currentUserName + "!");
@@ -155,8 +151,8 @@ public class frame extends Application {
         hrSubMenu.setPadding(new Insets(2, 0, 4, 0));
         Button navHRMembers = createNavButton("•", "Thành viên", false, true);
         Button navHRDepts = createNavButton("•", "Ban", false, true);
-        Button navHRRecruit = createNavButton("•", "Tuyển thành viên", false, true);
-        hrSubMenu.getChildren().addAll(navHRMembers, navHRDepts, navHRRecruit);
+
+        hrSubMenu.getChildren().addAll(navHRMembers, navHRDepts);
         hrSubMenu.setManaged(false); hrSubMenu.setVisible(false);
         hrGroup.getChildren().addAll(navHR, hrSubMenu);
         hrGroup.setOnMouseEntered(e -> { hrSubMenu.setManaged(true); hrSubMenu.setVisible(true); });
@@ -167,24 +163,24 @@ public class frame extends Application {
         VBox actSubMenu = new VBox(2);
         actSubMenu.setPadding(new Insets(2, 0, 4, 0));
         Button navActEvents = createNavButton("•", "Sự kiện", false, true);
-        Button navActAttendance = createNavButton("•", "Điểm danh", false, true);
         Button navActTasks = createNavButton("•", "Công việc", false, true);
-        actSubMenu.getChildren().addAll(navActEvents, navActAttendance, navActTasks);
+
+        actSubMenu.getChildren().addAll(navActEvents, navActTasks);
         actSubMenu.setManaged(false); actSubMenu.setVisible(false);
+
         actGroup.getChildren().addAll(navActivities, actSubMenu);
         actGroup.setOnMouseEntered(e -> { actSubMenu.setManaged(true); actSubMenu.setVisible(true); });
         actGroup.setOnMouseExited(e -> { actSubMenu.setManaged(false); actSubMenu.setVisible(false); });
 
         Button navFinance = createNavButton("💰", "Tài chính", false, false);
-        Button navReports = createNavButton("📊", "Báo cáo", false, false);
 
         allNavButtons = new Button[] {
-                navDashboard, navHR, navHRMembers, navHRDepts, navHRRecruit,
-                navActivities, navActEvents, navActAttendance, navActTasks,
-                navFinance, navReports
+                navDashboard, navHR, navHRMembers, navHRDepts,
+                navActivities, navActEvents, navActTasks,
+                navFinance
         };
 
-        navList.getChildren().addAll(navDashboard, hrGroup, actGroup, navFinance, navReports);
+        navList.getChildren().addAll(navDashboard, hrGroup, actGroup, navFinance);
 
         Region sidebarSpacer = new Region();
         VBox.setVgrow(sidebarSpacer, Priority.ALWAYS);
@@ -213,13 +209,13 @@ public class frame extends Application {
         btnAvatar.setStyle("-fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand; -fx-background-radius: 22px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.2), 10, 0.4, 0, 4);");
         btnAvatar.setOnMouseEntered(e -> { btnAvatar.setScaleX(1.1); btnAvatar.setScaleY(1.1); });
         btnAvatar.setOnMouseExited(e -> { btnAvatar.setScaleX(1.0); btnAvatar.setScaleY(1.0); });
-
         btnAvatar.setOnAction(e -> switchTabFocus(null, "Hồ sơ cá nhân"));
 
         userActions.getChildren().addAll(btnLogout, btnAvatar);
 
         Label userName = format.formatLabel(currentUserName, FontWeight.BOLD, 12, "#1e293b");
-        Label userRole = format.formatLabel("HỘI TRƯỞNG", FontWeight.EXTRA_BOLD, 8, "#64748b");
+        Label userRole = format.formatLabel("TRƯỞNG BAN", FontWeight.EXTRA_BOLD, 8, "#64748b");
+
         userProfile.getChildren().addAll(userActions, userName, userRole);
 
         sidebar.getChildren().addAll(logoBox, navList, sidebarSpacer, userProfile);
@@ -238,6 +234,7 @@ public class frame extends Application {
 
         Region topSpacer = new Region();
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
+
         HBox topActions = new HBox(16);
         topActions.setAlignment(Pos.CENTER_RIGHT);
 
@@ -250,6 +247,7 @@ public class frame extends Application {
         setView(new dashboard());
 
         mainArea.getChildren().addAll(topBar, viewContainer);
+
         mainLayout.getChildren().addAll(sidebar, mainArea);
 
         modalOverlay = new StackPane();
@@ -264,7 +262,7 @@ public class frame extends Application {
         rootPane.getChildren().addAll(mainLayout, modalOverlay, toastContainer);
 
         Scene scene = new Scene(rootPane, 1366, 800);
-        primaryStage.setTitle("cluby - Hội trưởng");
+        primaryStage.setTitle("cluby - Trưởng Ban");
         primaryStage.getIcons().add(new Image("cluby.png"));
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -293,12 +291,9 @@ public class frame extends Application {
             case "Chung": { setMainTitle("Nắm tình hình nào!"); setView(new dashboard()); break; }
             case "Thành viên": { setMainTitle(title); setView(new member()); break; }
             case "Ban": { setMainTitle(title); setView(new department()); break; }
-            case "Tuyển thành viên": { setMainTitle(title); setView(new request()); break; }
             case "Sự kiện": { setMainTitle(title); setView(new event()); break; }
-            case "Điểm danh": { setMainTitle(title); setView(new attendance()); break; }
             case "Công việc": { setMainTitle(title); setView(new work()); break; }
             case "Tài chính": { setMainTitle(title); setView(new finance()); break; }
-            case "Báo cáo": { setMainTitle(title); setView(new report()); break; }
             case "Hồ sơ cá nhân": { setMainTitle(title); setView(new setting()); break; }
             default: setMainTitle(title); break;
         }
@@ -341,7 +336,6 @@ public class frame extends Application {
                         e -> { closeOverlayModal(); triggerToast("Đã đăng xuất khỏi hệ thống thành công!"); }
                 )
         );
-
         GaussianBlur blur = new GaussianBlur(25);
         mainLayout.setEffect(blur);
         modalOverlay.setVisible(true);
@@ -353,7 +347,6 @@ public class frame extends Application {
     public void showCustomModal(Node modalContent) {
         modalOverlay.getChildren().clear();
         modalOverlay.getChildren().add(modalContent);
-
         GaussianBlur blur = new GaussianBlur(25);
         mainLayout.setEffect(blur);
         modalOverlay.setVisible(true);

@@ -85,7 +85,6 @@ public class dashboard extends ScrollPane {
     private String trans3Amount = "+2.000.000đ";
     private boolean trans3IsIncome = true;
 
-    // Khởi tạo giao diện chính của bảng điều khiển tổng quan
     public dashboard() {
         VBox mainContent = new VBox(32);
         mainContent.setPadding(new Insets(32));
@@ -99,7 +98,6 @@ public class dashboard extends ScrollPane {
         this.setContent(mainContent);
     }
 
-    // Tạo thanh tiêu đề chứa tên câu lạc bộ và nút thông báo
     private HBox buildHeader() {
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
@@ -117,7 +115,6 @@ public class dashboard extends ScrollPane {
         return header;
     }
 
-    // Tạo hàng thẻ thống kê các số liệu tổng quan cơ bản
     private HBox buildStatsRow() {
         HBox row = new HBox(24);
         row.setAlignment(Pos.CENTER);
@@ -134,7 +131,6 @@ public class dashboard extends ScrollPane {
         return row;
     }
 
-    // Tạo khối hiển thị hoạt động sắp tới và thông báo hệ thống
     private HBox buildMiddleRow() {
         HBox row = new HBox(24);
 
@@ -176,7 +172,6 @@ public class dashboard extends ScrollPane {
         return row;
     }
 
-    // Tạo khối biểu đồ tròn biểu diễn tình hình nhân sự theo ban
     private VBox buildPersonnelRow() {
         VBox rowCard = format.formatBoxCard();
         HBox.setHgrow(rowCard, Priority.ALWAYS);
@@ -213,7 +208,6 @@ public class dashboard extends ScrollPane {
         return rowCard;
     }
 
-    // Tạo khối báo cáo tài chính gồm ô chỉ số và danh sách giao dịch
     private VBox buildFinanceRow() {
         VBox finCol = format.formatBoxCard();
         HBox.setHgrow(finCol, Priority.ALWAYS);
@@ -258,7 +252,6 @@ public class dashboard extends ScrollPane {
         return finCol;
     }
 
-    // Thiết lập cấu trúc giao diện cho từng thẻ số liệu tổng quan có chứa icon
     private VBox createStatCard(String title, String value, String titleColor, String valColor, String iconBg, String iconEmoji) {
         VBox box = format.formatBoxCard();
         box.setPadding(new Insets(20));
@@ -281,7 +274,6 @@ public class dashboard extends ScrollPane {
         return box;
     }
 
-    // Thiết lập bố cục thẻ hiển thị thông tin tóm tắt của một hoạt động sự kiện
     private VBox createEventCard(String category, String title, String date, String loc, String reg) {
         VBox box = new VBox(12);
         box.setPadding(new Insets(20));
@@ -303,7 +295,6 @@ public class dashboard extends ScrollPane {
         return box;
     }
 
-    // Tạo khối văn bản nhỏ hiển thị tiêu đề và nội dung thuộc tính của sự kiện
     private VBox createMiniStat(String title, String val, String valColor) {
         VBox box = new VBox(2);
         box.setMinHeight(Region.USE_PREF_SIZE);
@@ -313,7 +304,6 @@ public class dashboard extends ScrollPane {
         return box;
     }
 
-    // Tạo hộp thông tin số lượng nhân sự dạng ô kính mờ cho từng phân ban
     private VBox createDeptStat(String name, String count) {
         VBox box = new VBox(4);
         box.setPadding(new Insets(16));
@@ -325,7 +315,6 @@ public class dashboard extends ScrollPane {
         return box;
     }
 
-    // Tạo ô thẻ hiển thị số tiền hoặc chỉ số thu chi tài chính thu nhỏ
     private VBox createMiniFinCard(String title, String val, String valColor) {
         VBox box = new VBox(4);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -342,7 +331,6 @@ public class dashboard extends ScrollPane {
         return box;
     }
 
-    // Tạo hàng hiển thị lịch sử một mục giao dịch tài chính thu hoặc chi
     private HBox createTransRow(String date, String name, String amount, boolean isIncome) {
         HBox box = new HBox(12);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -364,7 +352,6 @@ public class dashboard extends ScrollPane {
         return box;
     }
 
-    // Tạo một hàng thông báo hệ thống đi kèm chấm tròn màu đánh dấu nhận diện
     private HBox createNotifRow(String text, String dotColor) {
         HBox box = new HBox(12);
         box.setAlignment(Pos.CENTER_LEFT);

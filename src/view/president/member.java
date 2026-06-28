@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -13,27 +14,26 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import view.format;
-import view.president.frame;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import view.format;
 
 public class member extends ScrollPane {
 
-    // Khởi tạo giao diện chính quản lý danh sách thành viên và các bộ lọc tìm kiếm
     public member() {
         VBox mainContent = new VBox(24);
         mainContent.setPadding(new Insets(32));
         mainContent.setStyle("-fx-background-color: transparent;");
+        mainContent.setMaxWidth(1000);
 
         HBox kpiRow = new HBox(16);
         kpiRow.getChildren().addAll(
-                format.formatKPICard("Tổng thành viên", "128", "#64748b", "#1e293b"),
-                format.formatKPICard("🟢 Đang hoạt động", "100", "#10b981", "#1e293b"),
-                format.formatKPICard("🟡 Tạm nghỉ", "20", "#f59e0b", "#1e293b"),
-                format.formatKPICard("🔴 Đã rời CLB", "8", "#64748b", "#1e293b")
+                format.formatKPICard("Tổng số", "120", "#64748b", "#1e293b"),
+                format.formatKPICard("Hoạt động", "100", "#10b981", "#1e293b"),
+                format.formatKPICard("Tạm nghỉ", "15", "#f59e0b", "#1e293b"),
+                format.formatKPICard("Đã rời", "5", "#64748b", "#1e293b")
         );
-        for(javafx.scene.Node node : kpiRow.getChildren()) { HBox.setHgrow(node, Priority.ALWAYS); }
+        for(Node node : kpiRow.getChildren()) { HBox.setHgrow(node, Priority.ALWAYS); }
 
         HBox filterBar = new HBox(16);
         filterBar.setAlignment(Pos.CENTER_LEFT);
@@ -42,19 +42,19 @@ public class member extends ScrollPane {
 
         HBox searchBox = new HBox(8);
         searchBox.setAlignment(Pos.CENTER_LEFT);
-        TextField searchField = format.formatTextField("Nhập tên thành viên...");
+        TextField searchField = format.formatTextField("Tìm tên...");
         Button btnSearch = format.formatFindBtn();
         searchBox.getChildren().addAll(searchField, btnSearch);
 
-        ComboBox<String> cbBan = format.formatSortBtn("Lọc theo Ban", "Tất cả Ban", "Truyền thông", "Kỹ thuật", "Sự kiện", "Nhân sự", "Đối ngoại", "Chưa phân công");
-        ComboBox<String> cbRole = format.formatSortBtn("Lọc chức vụ", "Tất cả Chức vụ", "Hội trưởng", "Hội phó", "Trưởng ban", "Thành viên");
-        ComboBox<String> cbStatus = format.formatSortBtn("Trạng thái", "Tất cả", "Đang hoạt động", "Tạm nghỉ", "Đã rời CLB", "Bị khóa");
+        ComboBox<String> cbBan = format.formatSortBtn("Bộ phận", "Tất cả", "Nội dung", "Kỹ thuật", "Truyền thông", "Hậu cần", "Chưa phân ban");
+        ComboBox<String> cbRole = format.formatSortBtn("Chức vụ", "Tất cả", "Quản lý", "Trưởng nhóm", "Thành viên");
+        ComboBox<String> cbStatus = format.formatSortBtn("Trạng thái", "Tất cả", "Hoạt động", "Tạm nghỉ", "Đã rời");
 
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Button btnAdd = format.formatBtn("Thêm thành viên", "➕");
         btnAdd.setOnAction(e -> {
-            StackPane addModal = createAddMemberModal(() -> frame.getInstance().closeOverlayModal());
+            VBox addModal = createAddMemberModal();
             frame.getInstance().showCustomModal(addModal);
         });
 
@@ -64,46 +64,66 @@ public class member extends ScrollPane {
         tableContainer.getChildren().add(createMemberTableHeader());
 
         EventHandler<ActionEvent> markAsLeftAction = e -> {
-            VBox confirmModal = format.formatSimpleModal(
-                    "Xác nhận thay đổi", "Chuyển trạng thái thành viên này sang 'Đã rời CLB'?", "Hủy", "Xác nhận",
+            VBox confirmBox = format.formatSimpleModal(
+                    "Xác nhận", "Chuyển trạng thái thành viên này sang 'Đã rời'?", "Hủy", "Xác nhận",
                     ev -> frame.getInstance().closeOverlayModal(),
                     ev -> {
                         frame.getInstance().closeOverlayModal();
-                        frame.getInstance().triggerToast("Đã thay đổi trạng thái thành viên!");
+                        frame.getInstance().triggerToast("Đã cập nhật trạng thái");
                     });
-            frame.getInstance().showCustomModal(confirmModal);
+
+            confirmBox.setMaxSize(400, Region.USE_PREF_SIZE);
+            frame.getInstance().showCustomModal(confirmBox);
         };
 
-        tableContainer.getChildren().addAll(
-                createMemberRow("trish.jpeg", "Alexandra Đặng", "23HT001", "alex@gmail.com", "0901234567", "Chưa phân công", "Hội trưởng", "01/01/2023", "Đang hoạt động", "Phụ trách điều hành tổng quan", markAsLeftAction),
-                createMemberRow("trish.jpeg", "Hoàng Kim Yến", "24HP002", "yen@gmail.com", "0909888777", "Chưa phân công", "Hội phó", "15/05/2024", "Đang hoạt động", "Quản lý trực tiếp các trưởng ban", markAsLeftAction),
-                createMemberRow("trish.jpeg", "Nguyễn Văn A", "25GT020", "abc@gmail.com", "0123456789", "Truyền thông", "Trưởng ban", "01/03/2025", "Đang hoạt động", "", markAsLeftAction),
-                createMemberRow("trish.jpeg", "Lê Văn C", "24SK011", "levanc@gmail.com", "0988776655", "Sự kiện", "Thành viên", "15/09/2024", "Tạm nghỉ", "Xin nghỉ ôn thi đến tháng 8", markAsLeftAction)
+        VBox rows = new VBox(4);
+        rows.getChildren().addAll(
+                createMemberRow("temp.png", "Nguyễn Minh Quân", "24KT001", "quan.nm@gmail.com", "0901234567", "Chưa phân ban", "Quản lý", "01/01/2024", "Hoạt động", "Chịu trách nhiệm điều hành chung.", 0, 15, 15, 0, markAsLeftAction),
+                createMemberRow("temp.png", "Trần Thu Hà", "24ND015", "ha.tt@gmail.com", "0912345678", "Nội dung", "Trưởng nhóm", "15/03/2024", "Hoạt động", "", 2, 10, 12, 0, markAsLeftAction),
+                createMemberRow("temp.png", "Lê Đức Anh", "25KT022", "anh.ld@gmail.com", "0923456789", "Kỹ thuật", "Thành viên", "10/10/2025", "Tạm nghỉ", "Nghỉ cá nhân.", 0, 4, 4, 0, markAsLeftAction)
         );
 
+        ScrollPane scrollList = new ScrollPane(rows);
+        scrollList.setPrefHeight(450);
+        format.formatScrollbar(scrollList, rows, 8);
+        applySmoothScroll(scrollList, rows);
+
+        tableContainer.getChildren().add(scrollList);
         mainContent.getChildren().addAll(kpiRow, filterBar, tableContainer);
         format.formatScrollbar(this, mainContent, 12);
         this.setContent(mainContent);
     }
 
-    // Tạo thanh tiêu đề cột cho bảng danh sách thành viên
+    private void applySmoothScroll(ScrollPane scroll, VBox content) {
+        scroll.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, event -> {
+            if (event.getDeltaY() != 0) {
+                event.consume();
+                double vvalue = scroll.getVvalue();
+                double delta = event.getDeltaY() * 2.5;
+                double contentHeight = content.getBoundsInLocal().getHeight();
+                double viewportHeight = scroll.getViewportBounds().getHeight();
+                if (contentHeight > viewportHeight) scroll.setVvalue(vvalue - delta / (contentHeight - viewportHeight));
+            }
+        });
+    }
+
     private HBox createMemberTableHeader() {
         HBox header = new HBox(16);
         header.setPadding(new Insets(12, 16, 12, 16));
         header.setStyle("-fx-border-color: transparent transparent rgba(255,255,255,0.4) transparent; -fx-border-width: 1px;");
-        Label l1 = format.formatLabel("AVATAR", FontWeight.BLACK, 10, "#94a3b8"); l1.setPrefWidth(60);
-        Label l2 = format.formatLabel("THÀNH VIÊN", FontWeight.BLACK, 10, "#94a3b8"); l2.setPrefWidth(200);
-        Label l3 = format.formatLabel("BAN", FontWeight.BLACK, 10, "#94a3b8"); l3.setPrefWidth(120);
+
+        Label l1 = format.formatLabel("LOGO", FontWeight.BLACK, 10, "#94a3b8"); l1.setPrefWidth(60);
+        Label l2 = format.formatLabel("THÀNH VIÊN", FontWeight.BLACK, 10, "#94a3b8"); l2.setPrefWidth(220);
+        Label l3 = format.formatLabel("BỘ PHẬN", FontWeight.BLACK, 10, "#94a3b8"); l3.setPrefWidth(140);
         Label l4 = format.formatLabel("CHỨC VỤ", FontWeight.BLACK, 10, "#94a3b8"); l4.setPrefWidth(120);
         Label l5 = format.formatLabel("TRẠNG THÁI", FontWeight.BLACK, 10, "#94a3b8"); l5.setPrefWidth(120);
-        Label l6 = format.formatLabel(" ", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(40);
-        Label l7 = format.formatLabel(" ", FontWeight.BLACK, 10, "#94a3b8"); l7.setPrefWidth(40);
-        header.getChildren().addAll(l1, l2, l3, l4, l5, l6, l7);
+        Label l6 = format.formatLabel("HÀNH ĐỘNG", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(100);
+
+        header.getChildren().addAll(l1, l2, l3, l4, l5, l6);
         return header;
     }
 
-    // Tạo một hàng hiển thị thông tin rút gọn của thành viên trong bảng danh sách kèm nút xem chi tiết và xóa
-    private HBox createMemberRow(String avatarUrl, String name, String id, String email, String phone, String dept, String role, String date, String status, String note, EventHandler<ActionEvent> onDelete) {
+    private HBox createMemberRow(String avatarUrl, String name, String id, String email, String phone, String dept, String role, String date, String status, String note, int dangCo, int daLam, int daNhan, int thieuSot, EventHandler<ActionEvent> onDelete) {
         HBox row = new HBox(16);
         row.setPadding(new Insets(12, 16, 12, 16));
         row.setAlignment(Pos.CENTER_LEFT);
@@ -115,277 +135,375 @@ public class member extends ScrollPane {
         avatar.setFitWidth(40); avatar.setFitHeight(40); avatar.setClip(new Circle(20, 20, 20));
         HBox avatarBox = new HBox(avatar); avatarBox.setPrefWidth(60);
 
-        Label lblName = format.formatLabel(name, FontWeight.BOLD, 14, "#1e293b"); lblName.setPrefWidth(200);
-        Label lblBan = format.formatLabel(dept, FontWeight.MEDIUM, 13, "#475569"); lblBan.setPrefWidth(120);
+        Label lblName = format.formatLabel(name, FontWeight.BOLD, 14, "#1e293b"); lblName.setPrefWidth(220); lblName.setWrapText(true);
+        Label lblBan = format.formatLabel(dept, FontWeight.MEDIUM, 13, "#475569"); lblBan.setPrefWidth(140); lblBan.setWrapText(true);
 
-        String roleBg = (role.equals("Hội trưởng") || role.equals("Hội phó")) ? "rgba(245,158,11,0.15)" : (role.equals("Trưởng ban") ? "rgba(16,185,129,0.15)" : "rgba(124,77,255,0.1)");
-        String roleText = (role.equals("Hội trưởng") || role.equals("Hội phó")) ? "#f59e0b" : (role.equals("Trưởng ban") ? "#10b981" : "#7c4dff");
-        HBox roleBox = new HBox(format.formatBadge(role, roleBg, roleText)); roleBox.setAlignment(Pos.CENTER_LEFT); roleBox.setPrefWidth(120);
+        HBox roleBox = new HBox(createDynamicBadge(role, true)); roleBox.setAlignment(Pos.CENTER_LEFT); roleBox.setPrefWidth(120);
+        HBox statusBox = new HBox(createDynamicBadge(status, false)); statusBox.setAlignment(Pos.CENTER_LEFT); statusBox.setPrefWidth(120);
 
-        String stBg = status.equals("Đang hoạt động") ? "rgba(16,185,129,0.15)" : status.equals("Tạm nghỉ") ? "rgba(245,158,11,0.15)" : status.equals("Bị khóa") ? "rgba(239,68,68,0.15)" : "rgba(100,116,139,0.15)";
-        String stText = status.equals("Đang hoạt động") ? "#10b981" : status.equals("Tạm nghỉ") ? "#f59e0b" : status.equals("Bị khóa") ? "#ef4444" : "#64748b";
-        HBox statusBox = new HBox(format.formatBadge(status, stBg, stText)); statusBox.setAlignment(Pos.CENTER_LEFT); statusBox.setPrefWidth(120);
+        HBox actionBox = new HBox(8); actionBox.setAlignment(Pos.CENTER_LEFT); actionBox.setPrefWidth(100);
 
-        Button btnEdit = format.formatCircleBtn("👁️‍🗨️", "#448aff", "#7c4dff");
-        btnEdit.setOnAction(e -> {
-            StackPane modal = createMemberProfileModal(avatarUrl, name, id, email, phone, dept, role, date, status, note, () -> frame.getInstance().closeOverlayModal());
+        Button btnView = format.formatCircleBtn("👁️‍🗨️", "#448aff", "#7c4dff");
+        btnView.setOnAction(e -> {
+            VBox modal = createMemberProfileModal(avatarUrl, name, id, email, phone, dept, role, date, status, note, dangCo, daLam, daNhan, thieuSot);
             frame.getInstance().showCustomModal(modal);
         });
-        HBox editBox = new HBox(btnEdit); editBox.setAlignment(Pos.CENTER); editBox.setPrefWidth(40);
 
         Button btnDelete = format.formatCircleBtn("➖", "#ef4444", "#dc2626");
         if (onDelete != null) btnDelete.setOnAction(onDelete);
-        HBox delBox = new HBox(btnDelete); delBox.setAlignment(Pos.CENTER); delBox.setPrefWidth(40);
 
-        row.getChildren().addAll(avatarBox, lblName, lblBan, roleBox, statusBox, editBox, delBox);
+        actionBox.getChildren().addAll(btnView, btnDelete);
+        row.getChildren().addAll(avatarBox, lblName, lblBan, roleBox, statusBox, actionBox);
+
         return row;
     }
 
-    // Tạo cửa sổ modal hỗ trợ nhập liệu, tra cứu thông tin ứng viên để lập hồ sơ thêm thành viên mới
-    private StackPane createAddMemberModal(Runnable onClose) {
-        StackPane rootModalPane = new StackPane();
+    private Label createDynamicBadge(String text, boolean isRoleType) {
+        String bg = "rgba(124,77,255,0.1)";
+        String fg = "#7c4dff";
+        if (isRoleType) {
+            if (text.equals("Quản lý")) {
+                bg = "rgba(245,158,11,0.15)"; fg = "#f59e0b";
+            } else if (text.equals("Trưởng nhóm")) {
+                bg = "rgba(16,185,129,0.15)"; fg = "#10b981";
+            }
+        } else {
+            if (text.equals("Hoạt động")) {
+                bg = "rgba(16,185,129,0.15)"; fg = "#10b981";
+            } else if (text.equals("Tạm nghỉ")) {
+                bg = "rgba(245,158,11,0.15)"; fg = "#f59e0b";
+            } else if (text.equals("Đã rời") || text.equals("Bị khóa")) {
+                bg = "rgba(239,68,68,0.15)"; fg = "#ef4444";
+            }
+        }
+        return format.formatBadge(text, bg, fg);
+    }
 
-        VBox box = new VBox(16);
-        box.setPrefWidth(450);
-        box.setMaxSize(450, Region.USE_PREF_SIZE);
-        box.setPadding(new Insets(28));
-        box.setStyle("-fx-background-color: rgba(255,255,255); -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
-        box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+    private VBox createAddMemberModal() {
+        VBox rootModal = new VBox();
+        rootModal.setMaxSize(400, Region.USE_PREF_SIZE);
+        rootModal.setAlignment(Pos.CENTER);
 
-        Label title = format.formatLabel("Thêm thành viên mới", FontWeight.BLACK, 22, "#1e293b");
-        Label sub = format.formatLabel("Tra cứu theo Mã định danh để cấp quyền và xếp Ban nội bộ.", FontWeight.MEDIUM, 11, "#94a3b8");
+        VBox formBox = new VBox(20);
+        formBox.setPadding(new Insets(32));
+        formBox.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
+        formBox.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
-        VBox fields = new VBox(12);
+        Label title = format.formatLabel("Thêm thành viên", FontWeight.BLACK, 24, "#1e293b");
+        Label sub = format.formatLabel("Tìm theo mã định danh để cấp quyền.", FontWeight.MEDIUM, 13, "#94a3b8");
+        sub.setWrapText(true);
 
-        VBox idGroup = new VBox(4);
-        Label lblId = format.formatLabel("Mã định danh (ID Sinh viên / ID Ứng viên)", FontWeight.BOLD, 12, "#94a3b8");
-        HBox idRow = new HBox(8);
-        TextField fId = format.formatTextField("Nhập mã định danh (Ví dụ: 25GT020)...");
+        VBox fields = new VBox(16);
+
+        VBox idGroup = new VBox(8);
+        HBox idRow = new HBox(12);
+        TextField fId = format.formatTextField("Nhập mã...");
         HBox.setHgrow(fId, Priority.ALWAYS);
         Button btnSearch = getFormBtn("🔍", "#5020d8", "white");
         idRow.getChildren().addAll(fId, btnSearch);
-        idGroup.getChildren().addAll(lblId, idRow);
+        idGroup.getChildren().addAll(format.formatLabel("Mã định danh", FontWeight.BOLD, 12, "#94a3b8"), idRow);
 
-        VBox deptGroup = new VBox(4);
-        Label lblDept = format.formatLabel("Ban hoạt động (Thành viên)", FontWeight.BOLD, 12, "#94a3b8");
-        ComboBox<String> cbDept = format.formatSortBtn("Chọn Ban tham gia", "Truyền thông", "Kỹ thuật", "Sự kiện", "Nhân sự", "Đối ngoại", "Chưa phân công");
-        cbDept.setPrefWidth(Double.MAX_VALUE);
-        deptGroup.getChildren().addAll(lblDept, cbDept);
+        VBox deptGroup = new VBox(8);
+        ComboBox<String> cbDept = format.formatSortBtn("Chọn bộ phận", "Nội dung", "Kỹ thuật", "Truyền thông", "Hậu cần", "Chưa phân ban");
+        cbDept.setMaxWidth(Double.MAX_VALUE);
+        deptGroup.getChildren().addAll(format.formatLabel("Bộ phận trực thuộc", FontWeight.BOLD, 12, "#94a3b8"), cbDept);
 
-        VBox dateGroup = new VBox(4);
-        Label lblDate = format.formatLabel("Ngày tham gia hệ thống", FontWeight.BOLD, 12, "#94a3b8");
+        VBox dateGroup = new VBox(8);
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        TextField fDate = format.formatTextField(today);
-        fDate.setText(today);
-        fDate.setDisable(true);
-        dateGroup.getChildren().addAll(lblDate, fDate);
+        TextField fDate = format.formatTextField(today); fDate.setDisable(true);
+        dateGroup.getChildren().addAll(format.formatLabel("Ngày gia nhập", FontWeight.BOLD, 12, "#94a3b8"), fDate);
 
-        VBox noteGroup = new VBox(4);
-        Label lblNote = format.formatLabel("Ghi chú (Tuỳ chọn)", FontWeight.BOLD, 12, "#94a3b8");
-        TextField fNote = format.formatTextField("Điền thông tin bổ sung...");
-        noteGroup.getChildren().addAll(lblNote, fNote);
+        fields.getChildren().addAll(idGroup, deptGroup, dateGroup);
 
-        fields.getChildren().addAll(idGroup, deptGroup, dateGroup, noteGroup);
-
-        HBox actions = new HBox(12);
+        HBox actions = new HBox(16);
         actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setPadding(new Insets(16, 0, 0, 0));
 
         Button btnCancel = getFormBtn("Huỷ", "rgba(178, 162, 228, 0.2)", "#64748b");
-        btnCancel.setOnAction(e -> onClose.run());
-        Button btnConfirm = getFormBtn("Tạo hồ sơ", "#5020d8", "white");
+        btnCancel.setOnAction(e -> frame.getInstance().closeOverlayModal());
 
+        Button btnConfirm = getFormBtn("Xác nhận", "#10b981", "white");
         btnConfirm.setOnAction(e -> {
             if (fId.getText().trim().isEmpty() || cbDept.getValue() == null) {
-                frame.getInstance().triggerToast("Lỗi: Bạn cần tra cứu ID hợp lệ và chọn Ban để lưu hồ sơ!"); return;
+                frame.getInstance().triggerToast("Vui lòng nhập mã định danh và chọn bộ phận");
+                return;
             }
-            frame.getInstance().triggerToast("Thêm Thành viên mới vào hệ thống thành công!");
-            onClose.run();
+            frame.getInstance().triggerToast("Đã thêm thành viên");
+            frame.getInstance().closeOverlayModal();
         });
-
         actions.getChildren().addAll(btnCancel, btnConfirm);
-        box.getChildren().addAll(title, sub, fields, actions);
-        rootModalPane.getChildren().add(box);
+
+        formBox.getChildren().addAll(title, sub, fields, actions);
+        rootModal.getChildren().add(formBox);
 
         btnSearch.setOnAction(e -> {
             String query = fId.getText().trim();
             if (query.isEmpty()) {
-                frame.getInstance().triggerToast("Vui lòng nhập mã định danh để tiến hành tra cứu!");
+                frame.getInstance().triggerToast("Vui lòng nhập mã định danh");
                 return;
             }
 
-            if (query.equals("000")) {
-                frame.getInstance().triggerToast("Không tìm thấy người dùng với mã định danh này.");
-            } else {
-                VBox mockProfile = new VBox(20);
-                mockProfile.setPrefWidth(420);
-                mockProfile.setMaxSize(420, Region.USE_PREF_SIZE);
-                mockProfile.setPadding(new Insets(32));
-                mockProfile.setStyle("-fx-background-color: white; -fx-background-radius: 40px;");
-                mockProfile.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.4)));
+            VBox mockProfile = new VBox(24);
+            mockProfile.setMaxSize(360, Region.USE_PREF_SIZE);
+            mockProfile.setPadding(new Insets(32));
+            mockProfile.setStyle("-fx-background-color: white; -fx-background-radius: 40px;");
+            mockProfile.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.4)));
 
-                VBox headerInfo = new VBox(8);
-                headerInfo.setAlignment(Pos.CENTER);
-                ImageView avt = new ImageView(new Image("trish.jpeg"));
-                avt.setFitWidth(80); avt.setFitHeight(80); avt.setClip(new Circle(40, 40, 40));
-                headerInfo.getChildren().addAll(avt, format.formatLabel("Ứng viên Mẫu", FontWeight.BLACK, 24, "#1e293b"));
+            VBox headerInfo = new VBox(12);
+            headerInfo.setAlignment(Pos.CENTER);
+            ImageView avt = new ImageView(new Image("temp.png"));
+            avt.setFitWidth(80); avt.setFitHeight(80); avt.setClip(new Circle(40, 40, 40));
+            headerInfo.getChildren().addAll(avt, format.formatLabel("Kết quả tìm thấy", FontWeight.BLACK, 20, "#1e293b"));
 
-                VBox infoList = new VBox(12);
-                infoList.setAlignment(Pos.CENTER_LEFT);
-                infoList.setPadding(new Insets(0, 0, 0, 20));
-                infoList.getChildren().addAll(
-                        new VBox(2, format.formatLabel("Mã định danh", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(query, FontWeight.BOLD, 14, "#1e293b")),
-                        new VBox(2, format.formatLabel("Email", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel("mock.candidate@glimpz.com", FontWeight.BOLD, 14, "#1e293b")),
-                        new VBox(2, format.formatLabel("SĐT", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel("0901234567", FontWeight.BOLD, 14, "#1e293b"))
-                );
+            VBox infoList = new VBox(12);
+            infoList.setAlignment(Pos.CENTER_LEFT);
+            infoList.setPadding(new Insets(16));
+            infoList.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 20px; -fx-border-color: #e2e8f0; -fx-border-radius: 20px; -fx-border-width: 1px;");
 
-                HBox profileActions = new HBox(16);
-                profileActions.setAlignment(Pos.CENTER);
-                profileActions.setPadding(new Insets(10, 0, 0, 0));
+            infoList.getChildren().addAll(
+                    new VBox(2, format.formatLabel("Mã định danh", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(query, FontWeight.BOLD, 14, "#1e293b")),
+                    new VBox(2, format.formatLabel("Email", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel("user@gmail.com", FontWeight.BOLD, 14, "#1e293b")),
+                    new VBox(2, format.formatLabel("Số điện thoại", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel("0901234567", FontWeight.BOLD, 14, "#1e293b"))
+            );
 
-                Button btnNotMatch = new Button("Không phải\nứng viên này");
-                btnNotMatch.setPrefSize(130, 70);
-                btnNotMatch.setWrapText(true);
-                btnNotMatch.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-                btnNotMatch.setStyle("-fx-background-color: rgba(178, 162, 228, 0.2); -fx-text-fill: #64748b; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-background-radius: 16px; -fx-cursor: hand;");
-                btnNotMatch.setOnMouseEntered(ev -> { btnNotMatch.setScaleX(1.05); btnNotMatch.setScaleY(1.05); });
-                btnNotMatch.setOnMouseExited(ev -> { btnNotMatch.setScaleX(1.0); btnNotMatch.setScaleY(1.0); });
-                btnNotMatch.setOnAction(ev -> rootModalPane.getChildren().remove(mockProfile));
+            HBox profileActions = new HBox(12);
+            profileActions.setAlignment(Pos.CENTER);
+            profileActions.setPadding(new Insets(8, 0, 0, 0));
 
-                Button btnMatch = new Button("Đây đúng là thành\nviên tôi muốn thêm");
-                btnMatch.setPrefSize(130, 70);
-                btnMatch.setWrapText(true);
-                btnMatch.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-                btnMatch.setStyle("-fx-background-color: #5020d8; -fx-text-fill: white; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-background-radius: 16px; -fx-cursor: hand;");
-                btnMatch.setOnMouseEntered(ev -> { btnMatch.setScaleX(1.05); btnMatch.setScaleY(1.05); });
-                btnMatch.setOnMouseExited(ev -> { btnMatch.setScaleX(1.0); btnMatch.setScaleY(1.0); });
-                btnMatch.setOnAction(ev -> {
-                    rootModalPane.getChildren().remove(mockProfile);
-                    frame.getInstance().triggerToast("Mã định danh người dùng hợp lệ, vui lòng tiến hành các bước tiếp theo");
-                });
+            Button btnNotMatch = new Button("Hủy");
+            btnNotMatch.setPrefSize(120, 45);
+            btnNotMatch.setStyle("-fx-background-color: rgba(178, 162, 228, 0.2); -fx-text-fill: #64748b; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-background-radius: 20px; -fx-cursor: hand;");
+            btnNotMatch.setOnAction(ev -> rootModal.getChildren().setAll(formBox));
 
-                profileActions.getChildren().addAll(btnNotMatch, btnMatch);
-                mockProfile.getChildren().addAll(headerInfo, infoList, profileActions);
+            Button btnMatch = new Button("Chọn");
+            btnMatch.setPrefSize(120, 45);
+            btnMatch.setStyle("-fx-background-color: #5020d8; -fx-text-fill: white; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-background-radius: 20px; -fx-cursor: hand;");
+            btnMatch.setOnAction(ev -> {
+                rootModal.getChildren().setAll(formBox);
+                frame.getInstance().triggerToast("Đã chọn ứng viên, hãy thiết lập bộ phận");
+            });
 
-                rootModalPane.getChildren().add(mockProfile);
-            }
+            profileActions.getChildren().addAll(btnNotMatch, btnMatch);
+            mockProfile.getChildren().addAll(headerInfo, infoList, profileActions);
+
+            rootModal.getChildren().setAll(mockProfile);
         });
 
-        return rootModalPane;
+        return rootModal;
     }
 
-    // Tạo cửa sổ hai chế độ hỗ trợ việc xem chi tiết lý lịch thành viên hoặc chuyển đổi sang cấu trúc chỉnh sửa phân ban chức vụ
-    private StackPane createMemberProfileModal(String avatarUrl, String name, String id, String email, String phone, String dept, String role, String date, String status, String note, Runnable onClose) {
-        StackPane rootModalPane = new StackPane();
+    private VBox createMemberProfileModal(String avatarUrl, String name, String id, String email, String phone, String dept, String role, String date, String status, String note, int dangCo, int daLam, int daNhan, int thieuSot) {
+        VBox rootModal = new VBox();
+        rootModal.setAlignment(Pos.CENTER);
 
-        VBox viewMode = new VBox(20);
-        viewMode.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        viewMode.setPadding(new Insets(32));
+        StackPane modalContentStack = new StackPane();
+
+        VBox viewMode = new VBox(12);
+        viewMode.setPrefWidth(900);
+        viewMode.setMaxWidth(900);
+        viewMode.setPadding(new Insets(36));
         viewMode.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
         viewMode.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
-        VBox headerInfo = new VBox(8);
-        headerInfo.setAlignment(Pos.CENTER);
+        HBox row1 = new HBox(24);
+
+        VBox part1 = new VBox(16);
+        part1.setAlignment(Pos.TOP_CENTER);
+        part1.setPrefWidth(200);
+        part1.setMaxWidth(200);
+
         ImageView avt = new ImageView(new Image(avatarUrl));
-        avt.setFitWidth(80); avt.setFitHeight(80); avt.setClip(new Circle(40, 40, 40));
-        headerInfo.getChildren().addAll(avt, format.formatLabel(name, FontWeight.BLACK, 24, "#1e293b"));
+        avt.setFitWidth(120); avt.setFitHeight(120); avt.setClip(new Circle(60, 60, 60));
 
-        GridPane grid = new GridPane();
-        grid.setHgap(32); grid.setVgap(16);
-        grid.add(new VBox(2, format.formatLabel("Mã định danh", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(id, FontWeight.BOLD, 14, "#1e293b")), 0, 0);
-        grid.add(new VBox(2, format.formatLabel("Email", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(email, FontWeight.BOLD, 14, "#1e293b")), 1, 0);
-        grid.add(new VBox(2, format.formatLabel("SĐT", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(phone, FontWeight.BOLD, 14, "#1e293b")), 0, 1);
-        grid.add(new VBox(2, format.formatLabel("Ban", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(dept, FontWeight.BOLD, 14, "#1e293b")), 1, 1);
-        grid.add(new VBox(2, format.formatLabel("Chức vụ", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(role, FontWeight.BOLD, 14, "#1e293b")), 0, 2);
-        grid.add(new VBox(2, format.formatLabel("Ngày tham gia", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(date, FontWeight.BOLD, 14, "#1e293b")), 1, 2);
+        Label lblHeaderName = format.formatLabel(name, FontWeight.BLACK, 24, "#1e293b");
+        lblHeaderName.setWrapText(true); lblHeaderName.setAlignment(Pos.CENTER);
+        lblHeaderName.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
-        String displayNote = (note == null || note.isEmpty()) ? "Không có ghi chú" : note;
-        grid.add(new VBox(2, format.formatLabel("Ghi chú", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(displayNote, FontWeight.BOLD, 14, "#1e293b")), 0, 3, 2, 1);
+        Label roleBadge = createDynamicBadge(role, true);
+        roleBadge.setWrapText(true);
+        roleBadge.setStyle(roleBadge.getStyle() + "-fx-font-size: 13px; -fx-padding: 8 16;");
 
-        String stBg = status.equals("Đang hoạt động") ? "rgba(16,185,129,0.15)" : status.equals("Tạm nghỉ") ? "rgba(245,158,11,0.15)" : status.equals("Bị khóa") ? "rgba(239,68,68,0.15)" : "rgba(100,116,139,0.15)";
-        String stText = status.equals("Đang hoạt động") ? "#10b981" : status.equals("Tạm nghỉ") ? "#f59e0b" : status.equals("Bị khóa") ? "#ef4444" : "#64748b";
-        HBox statusLine = new HBox(12, format.formatLabel("Trạng thái:", FontWeight.BOLD, 12, "#94a3b8"), format.formatBadge(status, stBg, stText));
+        Label lblDateTitle = format.formatLabel("Ngày gia nhập", FontWeight.BOLD, 11, "#94a3b8"); lblDateTitle.setWrapText(true);
+        Label lblDateVal = format.formatLabel(date, FontWeight.BOLD, 14, "#1e293b"); lblDateVal.setWrapText(true);
+        VBox dateBox = new VBox(4, lblDateTitle, lblDateVal);
+        dateBox.setAlignment(Pos.CENTER);
+
+        part1.getChildren().addAll(avt, lblHeaderName, roleBadge, dateBox);
+
+        VBox part2 = format.formatBoxCard();
+        part2.setPrefWidth(280);
+        part2.setMaxWidth(280);
+        part2.setPadding(new Insets(24));
+        Label lblP2Title = format.formatLabel("THÔNG TIN CÁ NHÂN", FontWeight.BLACK, 13, "#94a3b8"); lblP2Title.setWrapText(true);
+        part2.getChildren().add(lblP2Title);
+
+        VBox infoList = new VBox(16);
+
+        Label lIdT = format.formatLabel("Mã định danh", FontWeight.BOLD, 11, "#94a3b8"); lIdT.setWrapText(true);
+        Label lIdV = format.formatLabel(id, FontWeight.BOLD, 14, "#1e293b"); lIdV.setWrapText(true);
+        infoList.getChildren().add(new VBox(4, lIdT, lIdV));
+
+        Label lEmT = format.formatLabel("Email", FontWeight.BOLD, 11, "#94a3b8"); lEmT.setWrapText(true);
+        Label lEmV = format.formatLabel(email, FontWeight.BOLD, 14, "#1e293b"); lEmV.setWrapText(true);
+        infoList.getChildren().add(new VBox(4, lEmT, lEmV));
+
+        Label lPhT = format.formatLabel("Số điện thoại", FontWeight.BOLD, 11, "#94a3b8"); lPhT.setWrapText(true);
+        Label lPhV = format.formatLabel(phone, FontWeight.BOLD, 14, "#1e293b"); lPhV.setWrapText(true);
+        infoList.getChildren().add(new VBox(4, lPhT, lPhV));
+
+        Label lDpT = format.formatLabel("Bộ phận", FontWeight.BOLD, 11, "#94a3b8"); lDpT.setWrapText(true);
+        Label lDpV = format.formatLabel(dept, FontWeight.BOLD, 14, "#1e293b"); lDpV.setWrapText(true);
+        infoList.getChildren().add(new VBox(4, lDpT, lDpV));
+
+        Label lStT = format.formatLabel("Trạng thái:", FontWeight.BOLD, 11, "#94a3b8"); lStT.setWrapText(true);
+        Label lStV = createDynamicBadge(status, false); lStV.setWrapText(true);
+        HBox statusLine = new HBox(8, lStT, lStV);
         statusLine.setAlignment(Pos.CENTER_LEFT);
+        infoList.getChildren().add(statusLine);
 
-        HBox viewActions = new HBox(12);
-        viewActions.setAlignment(Pos.CENTER_RIGHT);
+        part2.getChildren().add(infoList);
+
+        VBox part3 = format.formatBoxCard();
+        part3.setPrefWidth(300);
+        part3.setMaxWidth(300);
+        part3.setPadding(new Insets(24));
+        Label p3Title = format.formatLabel("SỰ KIỆN & CÔNG VIỆC", FontWeight.BLACK, 13, "#94a3b8"); p3Title.setWrapText(true);
+        part3.getChildren().add(p3Title);
+
+        GridPane statGrid = new GridPane();
+        statGrid.setHgap(20); statGrid.setVgap(16);
+
+        Label dcT = format.formatLabel("Đang có", FontWeight.BOLD, 11, "#64748b"); dcT.setWrapText(true);
+        Label dcV = format.formatLabel(String.valueOf(dangCo), FontWeight.BLACK, 24, "#3b82f6"); dcV.setWrapText(true);
+        statGrid.add(new VBox(6, dcT, dcV), 0, 0);
+
+        Label dlT = format.formatLabel("Đã hoàn thành", FontWeight.BOLD, 11, "#64748b"); dlT.setWrapText(true);
+        Label dlV = format.formatLabel(String.valueOf(daLam), FontWeight.BLACK, 24, "#10b981"); dlV.setWrapText(true);
+        statGrid.add(new VBox(6, dlT, dlV), 1, 0);
+
+        Label dnT = format.formatLabel("Đã giao", FontWeight.BOLD, 11, "#64748b"); dnT.setWrapText(true);
+        Label dnV = format.formatLabel(String.valueOf(daNhan), FontWeight.BLACK, 24, "#7c4dff"); dnV.setWrapText(true);
+        statGrid.add(new VBox(6, dnT, dnV), 0, 1);
+
+        Label tsT = format.formatLabel("Quá hạn", FontWeight.BOLD, 11, "#64748b"); tsT.setWrapText(true);
+        Label tsV = format.formatLabel(String.valueOf(thieuSot), FontWeight.BLACK, 24, "#ef4444"); tsV.setWrapText(true);
+        statGrid.add(new VBox(6, tsT, tsV), 1, 1);
+
+        part3.getChildren().add(statGrid);
+
+        Label cwT = format.formatLabel("Sự kiện ưu tiên hiện tại:", FontWeight.BOLD, 12, "#475569"); cwT.setWrapText(true);
+        VBox curWork = new VBox(8, cwT);
+        curWork.setPadding(new Insets(16, 0, 0, 0));
+        if (dangCo > 0) {
+            Label lblWork = format.formatLabel("• Thiết kế Poster cho Sự kiện mới", FontWeight.BOLD, 14, "#7c4dff");
+            lblWork.setWrapText(true);
+            curWork.getChildren().add(lblWork);
+        } else {
+            Label lblNoWork = format.formatLabel("Không có sự kiện nào.", FontWeight.MEDIUM, 13, "#94a3b8");
+            lblNoWork.setWrapText(true);
+            curWork.getChildren().add(lblNoWork);
+        }
+        part3.getChildren().add(curWork);
+
+        row1.getChildren().addAll(part1, part2, part3);
+
+        VBox row2 = format.formatBoxCard();
+        row2.setSpacing(4);
+        row2.setMaxWidth(Double.MAX_VALUE);
+        row2.setPadding(new Insets(16, 24, 16, 24));
+        Label r2Title = format.formatLabel("GHI CHÚ", FontWeight.BLACK, 13, "#94a3b8"); r2Title.setWrapText(true);
+        String displayNote = (note == null || note.isEmpty()) ? "Chưa có ghi chú." : note;
+        Label noteLbl = format.formatLabel(displayNote, FontWeight.BOLD, 14, "#1e293b"); noteLbl.setWrapText(true);
+        row2.getChildren().addAll(r2Title, noteLbl);
+
+        HBox row3 = new HBox(16);
+        row3.setAlignment(Pos.CENTER);
 
         Button btnClose = getFormBtn("Đóng", "rgba(178, 162, 228, 0.2)", "#64748b");
-        btnClose.setOnAction(e -> onClose.run());
-        Button btnSwitchToEdit = getFormBtn("Sửa", "#5020d8", "white");
+        btnClose.setOnAction(e -> frame.getInstance().closeOverlayModal());
 
-        viewActions.getChildren().addAll(btnClose, btnSwitchToEdit);
-        viewMode.getChildren().addAll(headerInfo, grid, statusLine, viewActions);
+        Button btnSwitchToEdit = getFormBtn("Sửa hồ sơ", "#5020d8", "white");
+        row3.getChildren().addAll(btnClose, btnSwitchToEdit);
 
-        VBox editMode = new VBox(20);
-        editMode.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        viewMode.getChildren().addAll(row1, row2, row3);
+
+        VBox editMode = new VBox(16);
+        editMode.setPrefWidth(450);
+        editMode.setMaxWidth(450);
         editMode.setPadding(new Insets(32));
         editMode.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
         editMode.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
         VBox editHeader = new VBox(8);
         editHeader.setAlignment(Pos.CENTER);
-        editHeader.getChildren().addAll(format.formatLabel("Chỉnh sửa Hồ sơ", FontWeight.BLACK, 24, "#1e293b"), format.formatLabel(name, FontWeight.BOLD, 14, "#7c4dff"));
+        Label eHT1 = format.formatLabel("Chỉnh sửa hồ sơ", FontWeight.BLACK, 22, "#1e293b"); eHT1.setWrapText(true);
+        Label eHT2 = format.formatLabel(name, FontWeight.BOLD, 14, "#7c4dff"); eHT2.setWrapText(true);
+        editHeader.getChildren().addAll(eHT1, eHT2);
 
-        VBox editForm = new VBox(16);
-        ComboBox<String> cbDept = format.formatSortBtn("Chọn Ban", "Truyền thông", "Kỹ thuật", "Sự kiện", "Nhân sự", "Đối ngoại", "Chưa phân công");
-        cbDept.setValue(dept); cbDept.setPrefWidth(350);
-        ComboBox<String> cbRole = format.formatSortBtn("Chọn Chức vụ", "Hội trưởng", "Hội phó", "Trưởng ban", "Thành viên");
-        cbRole.setValue(role); cbRole.setPrefWidth(350);
-        ComboBox<String> cbStatus = format.formatSortBtn("Chọn Trạng thái", "Đang hoạt động", "Tạm nghỉ", "Đã rời CLB", "Bị khóa");
-        cbStatus.setValue(status); cbStatus.setPrefWidth(350);
-        TextField fNote = format.formatTextField("Nhập ghi chú mới..."); fNote.setText(note);
+        VBox editForm = new VBox(12);
+
+        ComboBox<String> cbDept = format.formatSortBtn("Chọn bộ phận", "Nội dung", "Kỹ thuật", "Truyền thông", "Hậu cần", "Chưa phân ban");
+        cbDept.setValue(dept); cbDept.setMaxWidth(Double.MAX_VALUE);
+
+        ComboBox<String> cbRole = format.formatSortBtn("Chọn chức vụ", "Quản lý", "Trưởng nhóm", "Thành viên");
+        cbRole.setValue(role); cbRole.setMaxWidth(Double.MAX_VALUE);
+
+        ComboBox<String> cbStatus = format.formatSortBtn("Chọn trạng thái", "Hoạt động", "Tạm nghỉ", "Đã rời", "Bị khóa");
+        cbStatus.setValue(status); cbStatus.setMaxWidth(Double.MAX_VALUE);
+
+        TextArea fNote = new TextArea(note);
+        fNote.setPromptText("Nhập ghi chú mới...");
+        fNote.setWrapText(true);
+        fNote.setPrefRowCount(3);
+        fNote.setMaxWidth(Double.MAX_VALUE);
+        fNote.setMinHeight(80);
+        fNote.setStyle("-fx-background-radius: 12px; -fx-border-radius: 12px; -fx-font-family: 'Google Sans'; -fx-font-size: 13px; -fx-padding: 4; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;");
+
+        Label el1 = format.formatLabel("Bộ phận trực thuộc", FontWeight.BOLD, 11, "#94a3b8"); el1.setWrapText(true);
+        Label el2 = format.formatLabel("Chức vụ", FontWeight.BOLD, 11, "#94a3b8"); el2.setWrapText(true);
+        Label el3 = format.formatLabel("Trạng thái", FontWeight.BOLD, 11, "#94a3b8"); el3.setWrapText(true);
+        Label el4 = format.formatLabel("Ghi chú", FontWeight.BOLD, 11, "#94a3b8"); el4.setWrapText(true);
 
         editForm.getChildren().addAll(
-                new VBox(4, format.formatLabel("Ban hoạt động", FontWeight.BOLD, 12, "#94a3b8"), cbDept),
-                new VBox(4, format.formatLabel("Chức vụ", FontWeight.BOLD, 12, "#94a3b8"), cbRole),
-                new VBox(4, format.formatLabel("Trạng thái", FontWeight.BOLD, 12, "#94a3b8"), cbStatus),
-                new VBox(4, format.formatLabel("Ghi chú", FontWeight.BOLD, 12, "#94a3b8"), fNote)
+                new VBox(6, el1, cbDept),
+                new VBox(6, el2, cbRole),
+                new VBox(6, el3, cbStatus),
+                new VBox(6, el4, fNote)
         );
 
-        HBox editActions = new HBox(12); editActions.setAlignment(Pos.CENTER_RIGHT);
+        HBox editActions = new HBox(12); editActions.setAlignment(Pos.CENTER);
+        editActions.setPadding(new Insets(12, 0, 0, 0));
 
         Button btnCancelEdit = getFormBtn("Huỷ", "rgba(178, 162, 228, 0.2)", "#64748b");
-        btnCancelEdit.setOnAction(e -> rootModalPane.getChildren().setAll(viewMode));
+        btnCancelEdit.setOnAction(e -> {
+            editMode.setVisible(false);
+            viewMode.setVisible(true);
+        });
 
-        Button btnNext = getFormBtn("Tiếp", "#10b981", "white");
+        Button btnNext = getFormBtn("Lưu", "#10b981", "white");
         btnNext.setOnAction(e -> {
-            String newDept = cbDept.getValue(); String newRole = cbRole.getValue(); String newStatus = cbStatus.getValue(); String newNote = fNote.getText();
-            if (newRole.equals("Trưởng ban") && newDept.equals("Chưa phân công")) { frame.getInstance().triggerToast("Lỗi: Trưởng ban bắt buộc phải thuộc một ban!"); return; }
-            if ((newRole.equals("Hội trưởng") || newRole.equals("Hội phó")) && !newDept.equals("Chưa phân công")) { frame.getInstance().triggerToast("Lỗi: Hội trưởng và Hội phó không được thuộc ban nào!"); return; }
-
-            boolean isDeptChanged = !newDept.equals(dept); boolean isRoleChanged = !newRole.equals(role); boolean isStatusChanged = !newStatus.equals(status);
-            String oldNoteTrimmed = (note == null) ? "" : note.trim(); String newNoteTrimmed = (newNote == null) ? "" : newNote.trim();
-            boolean isNoteChanged = !oldNoteTrimmed.equals(newNoteTrimmed);
-
-            if (!isDeptChanged && !isRoleChanged && !isStatusChanged && !isNoteChanged) { frame.getInstance().triggerToast("Bạn chưa thay đổi thông tin nào!"); return; }
-
-            StringBuilder msg = new StringBuilder();
-            if (isRoleChanged) msg.append(newRole.equals("Thành viên") ? "Xác nhận hạ chức Thành viên đối với " : "Xác nhận thăng chức " + newRole + " cho ").append(name);
-            if (isDeptChanged) {
-                if (msg.length() > 0) msg.append("\n& ");
-                if (newDept.equals("Chưa phân công")) msg.append("Đưa ").append(name).append(" ra khỏi ban ").append(dept);
-                else if (dept.equals("Chưa phân công")) msg.append("Đưa ").append(name).append(" vào ban ").append(newDept);
-                else msg.append("Chuyển ").append(name).append(" từ ban ").append(dept).append(" sang ban ").append(newDept);
-            }
-            if (isStatusChanged) { if (msg.length() > 0) msg.append("\n& "); msg.append("Thay đổi trạng thái thành: ").append(newStatus); }
-            if (isNoteChanged) { if (msg.length() > 0) msg.append("\n& "); msg.append("Cập nhật Ghi chú nội bộ."); }
-
-            VBox confirmModal = format.formatSimpleModal("Xác nhận thay đổi", msg.toString(), "Quay lại", "Xác nhận",
-                    ev -> { rootModalPane.getChildren().setAll(editMode); },
-                    ev -> { frame.getInstance().triggerToast("Cập nhật hồ sơ thành công!"); onClose.run(); }
-            );
-            rootModalPane.getChildren().add(confirmModal);
+            frame.getInstance().triggerToast("Đã lưu thay đổi");
+            frame.getInstance().closeOverlayModal();
         });
 
         editActions.getChildren().addAll(btnCancelEdit, btnNext);
         editMode.getChildren().addAll(editHeader, editForm, editActions);
-        btnSwitchToEdit.setOnAction(e -> rootModalPane.getChildren().setAll(editMode));
-        rootModalPane.getChildren().add(viewMode);
-        return rootModalPane;
+
+        viewMode.setVisible(true);
+        editMode.setVisible(false);
+
+        modalContentStack.getChildren().addAll(viewMode, editMode);
+        rootModal.getChildren().add(modalContentStack);
+
+        btnSwitchToEdit.setOnAction(e -> {
+            viewMode.setVisible(false);
+            editMode.setVisible(true);
+        });
+
+        return rootModal;
     }
 
-    // Thiết lập màu sắc, font chữ và kiểm soát tỷ lệ co giãn đồ họa khi người dùng tương tác chuột trên nút bấm
-    private Button getFormBtn(String text, String bgColor, String textColor) {
+    private static Button getFormBtn(String text, String bgColor, String textColor) {
         Button btn = new Button(text);
         btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
         btn.setTextFill(Color.web(textColor));

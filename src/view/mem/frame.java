@@ -1,4 +1,4 @@
-package view.president;
+package view.mem;
 
 import javafx.application.Application;
 import javafx.animation.*;
@@ -19,11 +19,13 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import view.finance;
+import view.department;
 import view.format;
+import view.member;
 import view.setting;
 
 import java.time.LocalDateTime;
@@ -43,17 +45,17 @@ public class frame extends Application {
     private DropShadow mainShadow;
     private Label mainTitle;
     private StackPane viewContainer;
-
     private Button[] allNavButtons;
     private Button activeNavBtn = null;
-    private String currentUserName = "Hương";
+
+    private String currentUserName = "Phạm Thành Viên";
 
     @Override
     public void start(Stage primaryStage) {
         instance = this;
         rootPane = new StackPane();
-
         Pane backgroundPane = new Pane();
+
         Stop[] stops = new Stop[] {
                 new Stop(0.0, Color.web("#d3dbf4")),
                 new Stop(0.35, Color.web("#e8d6f5")),
@@ -79,7 +81,7 @@ public class frame extends Application {
 
         ScaleTransition st1 = new ScaleTransition(Duration.seconds(22), blob1);
         st1.setToX(1.2); st1.setToY(1.2); st1.setInterpolator(Interpolator.EASE_BOTH);
-        st1.setAutoReverse(true); st1.setCycleCount(Animation.INDEFINITE); st1.play();
+        st1.setAutoReverse(true); st1.setCycleCount(Animation.INDEFINITE); tt1.play();
 
         TranslateTransition tt2 = new TranslateTransition(Duration.seconds(28), blob2);
         tt2.setByX(-150); tt2.setByY(-100); tt2.setInterpolator(Interpolator.EASE_BOTH);
@@ -95,13 +97,12 @@ public class frame extends Application {
         mainLayout.setMaxSize(1300, 750);
         mainLayout.setPrefSize(1300, 750);
         mainLayout.setStyle("-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
-
         mainShadow = new DropShadow(45, 0, 16, Color.web("#311b92", 0.15));
         mainLayout.setEffect(mainShadow);
 
         VBox sidebar = new VBox();
-        sidebar.setPrefWidth(192); sidebar.setMinWidth(192); sidebar.setMaxWidth(192);
-        sidebar.setPadding(new Insets(24, 16, 24, 16));
+        sidebar.setPrefWidth(140); sidebar.setMinWidth(140); sidebar.setMaxWidth(140);
+        sidebar.setPadding(new Insets(24, 12, 24, 12));
         sidebar.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-background-radius: 40px 0px 0px 40px;");
         sidebar.setAlignment(Pos.TOP_CENTER);
 
@@ -109,16 +110,13 @@ public class frame extends Application {
         logoBox.setAlignment(Pos.CENTER);
         logoBox.setPadding(new Insets(0, 0, 24, 0));
 
-        StackPane logoImgContainer = new StackPane();
-        logoImgContainer.setPrefSize(44, 44); logoImgContainer.setMaxSize(44, 44);
         ImageView appLogo = new ImageView(new Image("cluby.png"));
-        appLogo.setFitWidth(44); appLogo.setFitHeight(44);
+        appLogo.setFitWidth(40); appLogo.setFitHeight(40);
         appLogo.setPreserveRatio(true);
-        Rectangle clip = new Rectangle(44, 44); clip.setArcWidth(16); clip.setArcHeight(16);
+        Rectangle clip = new Rectangle(40, 40); clip.setArcWidth(12); clip.setArcHeight(12);
         appLogo.setClip(clip);
-        logoImgContainer.getChildren().add(appLogo);
 
-        Label logoTitle = format.formatLabel("cluby", FontWeight.EXTRA_BOLD, 20, "#2d3748");
+        Label logoTitle = format.formatLabel("cluby", FontWeight.EXTRA_BOLD, 18, "#2d3748");
         logoTitle.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.15), 10, 0.4, 0, 4);");
 
         Label clockLabel = format.formatLabel("", FontWeight.BOLD, 10, "#64748b");
@@ -127,64 +125,35 @@ public class frame extends Application {
 
         Label greetingLabel = format.formatLabel("", FontWeight.BOLD, 11, "#7c4dff");
         greetingLabel.setPadding(new Insets(4, 0, 0, 0));
+        greetingLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        greetingLabel.setAlignment(Pos.CENTER);
 
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss\nEEEE, dd/MM/yyyy", new Locale("vi", "VN"));
             clockLabel.setText(now.format(formatter));
-
             int hour = now.getHour();
-            if (hour >= 4 && hour < 10) greetingLabel.setText("Chào buổi sáng, " + currentUserName + "!");
-            else if (hour >= 10 && hour < 13) greetingLabel.setText("Chào buổi trưa, " + currentUserName + "!");
-            else if (hour >= 13 && hour < 18) greetingLabel.setText("Chào buổi chiều, " + currentUserName + "!");
-            else if (hour >= 18 && hour < 23) greetingLabel.setText("Chào buổi tối, " + currentUserName + "!");
-            else greetingLabel.setText("Đã khuya rồi, " + currentUserName + "!");
+            if (hour >= 4 && hour < 10) greetingLabel.setText("Chào buổi sáng\n" + currentUserName + "!");
+            else if (hour >= 10 && hour < 13) greetingLabel.setText("Chào buổi trưa\n" + currentUserName + "!");
+            else if (hour >= 13 && hour < 18) greetingLabel.setText("Chào buổi chiều\n" + currentUserName + "!");
+            else if (hour >= 18 && hour < 23) greetingLabel.setText("Chào buổi tối\n" + currentUserName + "!");
+            else greetingLabel.setText("Đã khuya rồi\n" + currentUserName + "!");
         }), new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Animation.INDEFINITE); clock.play();
 
-        logoBox.getChildren().addAll(logoImgContainer, logoTitle, clockLabel, greetingLabel);
+        logoBox.getChildren().addAll(appLogo, logoTitle, clockLabel, greetingLabel);
 
-        VBox navList = new VBox(4);
+        VBox navList = new VBox(12);
         navList.setAlignment(Pos.TOP_CENTER);
 
-        Button navDashboard = createNavButton("🏠", "Chung", true, false);
+        Button navDashboard = createSquareNavButton("🏠", "Chung", true);
+        Button navMembers = createSquareNavButton("👥", "Thành viên", false);
+        Button navDepts = createSquareNavButton("🏢", "Ban", false);
+        Button navTasks = createSquareNavButton("📝", "Công việc", false);
+        Button navEvents = createSquareNavButton("📅", "Sự kiện", false);
 
-        VBox hrGroup = new VBox(0);
-        Button navHR = createNavButton("👥", "Nhân sự", false, false);
-        VBox hrSubMenu = new VBox(2);
-        hrSubMenu.setPadding(new Insets(2, 0, 4, 0));
-        Button navHRMembers = createNavButton("•", "Thành viên", false, true);
-        Button navHRDepts = createNavButton("•", "Ban", false, true);
-        Button navHRRecruit = createNavButton("•", "Tuyển thành viên", false, true);
-        hrSubMenu.getChildren().addAll(navHRMembers, navHRDepts, navHRRecruit);
-        hrSubMenu.setManaged(false); hrSubMenu.setVisible(false);
-        hrGroup.getChildren().addAll(navHR, hrSubMenu);
-        hrGroup.setOnMouseEntered(e -> { hrSubMenu.setManaged(true); hrSubMenu.setVisible(true); });
-        hrGroup.setOnMouseExited(e -> { hrSubMenu.setManaged(false); hrSubMenu.setVisible(false); });
-
-        VBox actGroup = new VBox(0);
-        Button navActivities = createNavButton("📅", "Hoạt động", false, false);
-        VBox actSubMenu = new VBox(2);
-        actSubMenu.setPadding(new Insets(2, 0, 4, 0));
-        Button navActEvents = createNavButton("•", "Sự kiện", false, true);
-        Button navActAttendance = createNavButton("•", "Điểm danh", false, true);
-        Button navActTasks = createNavButton("•", "Công việc", false, true);
-        actSubMenu.getChildren().addAll(navActEvents, navActAttendance, navActTasks);
-        actSubMenu.setManaged(false); actSubMenu.setVisible(false);
-        actGroup.getChildren().addAll(navActivities, actSubMenu);
-        actGroup.setOnMouseEntered(e -> { actSubMenu.setManaged(true); actSubMenu.setVisible(true); });
-        actGroup.setOnMouseExited(e -> { actSubMenu.setManaged(false); actSubMenu.setVisible(false); });
-
-        Button navFinance = createNavButton("💰", "Tài chính", false, false);
-        Button navReports = createNavButton("📊", "Báo cáo", false, false);
-
-        allNavButtons = new Button[] {
-                navDashboard, navHR, navHRMembers, navHRDepts, navHRRecruit,
-                navActivities, navActEvents, navActAttendance, navActTasks,
-                navFinance, navReports
-        };
-
-        navList.getChildren().addAll(navDashboard, hrGroup, actGroup, navFinance, navReports);
+        allNavButtons = new Button[] { navDashboard, navMembers, navDepts, navTasks, navEvents };
+        navList.getChildren().addAll(navDashboard, navMembers, navDepts, navTasks, navEvents);
 
         Region sidebarSpacer = new Region();
         VBox.setVgrow(sidebarSpacer, Priority.ALWAYS);
@@ -192,14 +161,11 @@ public class frame extends Application {
         VBox userProfile = new VBox(8);
         userProfile.setAlignment(Pos.CENTER);
         userProfile.setPadding(new Insets(12));
-        userProfile.setStyle("-fx-background-color: rgba(255,255,255,0.35); -fx-background-radius: 30px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.1), 12, 0.3, 0, 6);");
-
-        HBox userActions = new HBox(8);
-        userActions.setAlignment(Pos.CENTER);
+        userProfile.setStyle("-fx-background-color: rgba(255,255,255,0.35); -fx-background-radius: 20px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.1), 12, 0.3, 0, 6);");
 
         Button btnLogout = new Button("🚪");
-        btnLogout.setPrefSize(44, 44);
-        btnLogout.setStyle("-fx-background-color: #ef4444; -fx-background-radius: 22px; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 0; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(239,68,68,0.5), 10, 0.4, 0, 4);");
+        btnLogout.setPrefSize(36, 36);
+        btnLogout.setStyle("-fx-background-color: #ef4444; -fx-background-radius: 18px; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 0; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(239,68,68,0.5), 10, 0.4, 0, 4);");
         btnLogout.setOnMouseEntered(e -> { btnLogout.setScaleX(1.1); btnLogout.setScaleY(1.1); });
         btnLogout.setOnMouseExited(e -> { btnLogout.setScaleX(1.0); btnLogout.setScaleY(1.0); });
         btnLogout.setOnAction(e -> openLogoutModal());
@@ -213,14 +179,13 @@ public class frame extends Application {
         btnAvatar.setStyle("-fx-background-color: transparent; -fx-padding: 0; -fx-cursor: hand; -fx-background-radius: 22px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.2), 10, 0.4, 0, 4);");
         btnAvatar.setOnMouseEntered(e -> { btnAvatar.setScaleX(1.1); btnAvatar.setScaleY(1.1); });
         btnAvatar.setOnMouseExited(e -> { btnAvatar.setScaleX(1.0); btnAvatar.setScaleY(1.0); });
+        btnAvatar.setOnAction(e -> switchTabFocus(null, "Hồ sơ"));
 
-        btnAvatar.setOnAction(e -> switchTabFocus(null, "Hồ sơ cá nhân"));
+        HBox userActions = new HBox(8, btnLogout, btnAvatar);
+        userActions.setAlignment(Pos.CENTER);
 
-        userActions.getChildren().addAll(btnLogout, btnAvatar);
-
-        Label userName = format.formatLabel(currentUserName, FontWeight.BOLD, 12, "#1e293b");
-        Label userRole = format.formatLabel("HỘI TRƯỞNG", FontWeight.EXTRA_BOLD, 8, "#64748b");
-        userProfile.getChildren().addAll(userActions, userName, userRole);
+        Label userRole = format.formatLabel("THÀNH VIÊN", FontWeight.EXTRA_BOLD, 9, "#64748b");
+        userProfile.getChildren().addAll(userActions, userRole);
 
         sidebar.getChildren().addAll(logoBox, navList, sidebarSpacer, userProfile);
 
@@ -232,12 +197,13 @@ public class frame extends Application {
         topBar.setAlignment(Pos.CENTER_LEFT);
 
         VBox titleBox = new VBox(2);
-        mainTitle = format.formatLabel("Nắm tình hình nào!", FontWeight.BLACK, 32, "#1e293b");
+        mainTitle = format.formatLabel("Hoạt động Câu lạc bộ", FontWeight.BLACK, 32, "#1e293b");
         mainTitle.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.1), 10, 0.4, 0, 4);");
         titleBox.getChildren().add(mainTitle);
 
         Region topSpacer = new Region();
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
+
         HBox topActions = new HBox(16);
         topActions.setAlignment(Pos.CENTER_RIGHT);
 
@@ -250,6 +216,7 @@ public class frame extends Application {
         setView(new dashboard());
 
         mainArea.getChildren().addAll(topBar, viewContainer);
+
         mainLayout.getChildren().addAll(sidebar, mainArea);
 
         modalOverlay = new StackPane();
@@ -264,7 +231,7 @@ public class frame extends Application {
         rootPane.getChildren().addAll(mainLayout, modalOverlay, toastContainer);
 
         Scene scene = new Scene(rootPane, 1366, 800);
-        primaryStage.setTitle("cluby - Hội trưởng");
+        primaryStage.setTitle("cluby - Thành viên");
         primaryStage.getIcons().add(new Image("cluby.png"));
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -272,8 +239,8 @@ public class frame extends Application {
         triggerToast("Một ngày tốt lành, " + currentUserName + "!");
     }
 
-    public void setView(Node newView) {
-        if (viewContainer != null) viewContainer.getChildren().setAll(newView);
+    public void setView(Node nView) {
+        if (viewContainer != null) viewContainer.getChildren().setAll(nView);
     }
 
     public void setMainTitle(String title) {
@@ -282,55 +249,84 @@ public class frame extends Application {
 
     public void switchTabFocus(Button activeBtn, String title) {
         for (Button btn : allNavButtons) {
-            format.formatNavBtnInactive(btn);
+            setSquareNavInactive(btn);
         }
         if (activeBtn != null) {
-            format.formatNavBtnActive(activeBtn);
+            setSquareNavActive(activeBtn);
         }
         activeNavBtn = activeBtn;
 
         switch (title) {
-            case "Chung": { setMainTitle("Nắm tình hình nào!"); setView(new dashboard()); break; }
-            case "Thành viên": { setMainTitle(title); setView(new member()); break; }
-            case "Ban": { setMainTitle(title); setView(new department()); break; }
-            case "Tuyển thành viên": { setMainTitle(title); setView(new request()); break; }
-            case "Sự kiện": { setMainTitle(title); setView(new event()); break; }
-            case "Điểm danh": { setMainTitle(title); setView(new attendance()); break; }
-            case "Công việc": { setMainTitle(title); setView(new work()); break; }
-            case "Tài chính": { setMainTitle(title); setView(new finance()); break; }
-            case "Báo cáo": { setMainTitle(title); setView(new report()); break; }
-            case "Hồ sơ cá nhân": { setMainTitle(title); setView(new setting()); break; }
+            case "Chung": { setMainTitle("Hoạt động Câu lạc bộ"); setView(new dashboard()); break; }
+            case "Thành viên": { setMainTitle("Danh sách Thành viên"); setView(new member()); break; }
+            case "Ban": { setMainTitle("Thông tin các Ban"); setView(new department()); break; }
+            case "Công việc": { setMainTitle("Nhiệm vụ của tôi"); setView(new work()); break; }
+            case "Sự kiện": { setMainTitle("Sự kiện diễn ra"); setView(new event()); break; }
+            case "Hồ sơ": { setMainTitle("Hồ sơ cá nhân"); setView(new setting()); break; }
             default: setMainTitle(title); break;
         }
         triggerToast("Đã đến " + title.toUpperCase());
     }
 
-    private Button createNavButton(String emoji, String title, boolean isActive, boolean isSubItem) {
-        Button btn = format.formatNavBtn(emoji, title, isSubItem);
+    private Button createSquareNavButton(String emoji, String title, boolean isActive) {
+        Button btn = new Button();
+        btn.setPrefSize(80, 80);
+        btn.setMinSize(80, 80);
+        btn.setMaxSize(80, 80);
+
+        VBox content = new VBox(6);
+        content.setAlignment(Pos.CENTER);
+
+        Label iconLbl = new Label(emoji);
+        iconLbl.setStyle("-fx-font-size: 25px;");
+
+        Label titleLbl = new Label(title);
+        titleLbl.setFont(Font.font("Google Sans", FontWeight.BOLD, 11));
+
+        content.getChildren().addAll(iconLbl, titleLbl);
+        btn.setGraphic(content);
+        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
         if (isActive) {
-            format.formatNavBtnActive(btn);
+            setSquareNavActive(btn);
             activeNavBtn = btn;
         } else {
-            format.formatNavBtnInactive(btn);
+            setSquareNavInactive(btn);
         }
 
-        if(!title.equals("Nhân sự") && !title.equals("Hoạt động")) {
-            btn.setOnAction(e -> switchTabFocus(btn, title));
-        }
+        btn.setOnAction(e -> switchTabFocus(btn, title));
 
         btn.setOnMouseEntered(e -> {
-            btn.setScaleX(1.02); btn.setScaleY(1.02);
+            btn.setScaleX(1.05); btn.setScaleY(1.05);
             if (btn != activeNavBtn) {
-                btn.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12px; -fx-border-color: transparent; -fx-border-width: 0px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.1), 10, 0.4, 0, 4); -fx-cursor: hand;");
+                btn.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-background-radius: 18px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.1), 10, 0.4, 0, 4);");
             }
         });
 
         btn.setOnMouseExited(e -> {
             btn.setScaleX(1.0); btn.setScaleY(1.0);
-            if (btn != activeNavBtn) format.formatNavBtnInactive(btn);
+            if (btn != activeNavBtn) setSquareNavInactive(btn);
         });
 
         return btn;
+    }
+
+    private void setSquareNavActive(Button btn) {
+        btn.setStyle("-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.65) 100%); -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.12), 15, 0.4, 0, 6); -fx-cursor: hand;");
+        if (btn.getGraphic() instanceof VBox) {
+            for (Node n : ((VBox) btn.getGraphic()).getChildren()) {
+                if (n instanceof Label) ((Label)n).setTextFill(Color.web("#7c4dff"));
+            }
+        }
+    }
+
+    private void setSquareNavInactive(Button btn) {
+        btn.setStyle("-fx-background-color: transparent; -fx-background-radius: 18px; -fx-cursor: hand;");
+        if (btn.getGraphic() instanceof VBox) {
+            for (Node n : ((VBox) btn.getGraphic()).getChildren()) {
+                if (n instanceof Label) ((Label)n).setTextFill(Color.web("#475569"));
+            }
+        }
     }
 
     private void openLogoutModal() {
@@ -341,7 +337,6 @@ public class frame extends Application {
                         e -> { closeOverlayModal(); triggerToast("Đã đăng xuất khỏi hệ thống thành công!"); }
                 )
         );
-
         GaussianBlur blur = new GaussianBlur(25);
         mainLayout.setEffect(blur);
         modalOverlay.setVisible(true);
@@ -353,7 +348,6 @@ public class frame extends Application {
     public void showCustomModal(Node modalContent) {
         modalOverlay.getChildren().clear();
         modalOverlay.getChildren().add(modalContent);
-
         GaussianBlur blur = new GaussianBlur(25);
         mainLayout.setEffect(blur);
         modalOverlay.setVisible(true);

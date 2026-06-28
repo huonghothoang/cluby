@@ -19,7 +19,6 @@ import javafx.util.Duration;
 
 public class format {
 
-    // Định dạng cấu trúc phông chữ và màu sắc văn bản cho đối tượng Label
     public static Label formatLabel(String text, FontWeight weight, int size, String hexColor) {
         Label lbl = new Label(text);
         lbl.setFont(Font.font("Google Sans", weight, size));
@@ -27,7 +26,6 @@ public class format {
         return lbl;
     }
 
-    // Thiết lập thuộc tính đồ họa nền, màu chữ và bo góc để tạo nhãn trạng thái badge tĩnh
     public static Label formatBadge(String text, String bgColor, String textColor) {
         Label badge = new Label(text);
         badge.setStyle(
@@ -41,7 +39,6 @@ public class format {
         return badge;
     }
 
-    // Định dạng thuộc tính font chữ, màu nền, đường viền và hiệu ứng đổ bóng cho thành phần nút bấm ComboBox
     public static ComboBox<String> formatSortBtn(String prompt, String... items) {
         ComboBox<String> combo = new ComboBox<>();
         combo.getItems().addAll(items);
@@ -54,7 +51,6 @@ public class format {
         return combo;
     }
 
-    // Thiết lập màu nền gradient, hiệu ứng đổ bóng và xử lý chuyển động tỷ lệ khi di chuyển chuột cho nút bấm có nhãn icon
     public static Button formatBtn(String text, String iconStr) {
         Button btn = new Button();
         HBox content = new HBox(8);
@@ -80,7 +76,6 @@ public class format {
         return btn;
     }
 
-    // Cấu hình thuộc tính hình ảnh, phông chữ nền tím và hiệu ứng co dãn tương tác chuột cho nút bấm chức năng tìm kiếm
     public static Button formatFindBtn() {
         Button btn = new Button("🔍");
         btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
@@ -98,7 +93,6 @@ public class format {
         return btn;
     }
 
-    // Thiết lập hình dáng tròn, màu nền linh hoạt và kiểm soát thay đổi style, kích thước khi rê chuột trên nút thao tác hình tròn
     public static Button formatCircleBtn(String iconStr, String bgColor, String hoverBgColor) {
         Button btn = new Button(iconStr);
         btn.setFont(Font.font("Segoe UI Emoji", 12));
@@ -121,7 +115,6 @@ public class format {
         return btn;
     }
 
-    // Đồng bộ cấu trúc thẻ vùng chứa thông báo nhanh dạng toast kết hợp gán chuỗi hiệu ứng chuyển động làm mờ tự động ẩn
     public static void formatToast(VBox toastContainer, String msg) {
         HBox toast = new HBox(12);
         toast.setAlignment(Pos.CENTER_LEFT);
@@ -146,7 +139,6 @@ public class format {
         fadeOut.play(); slideOut.play();
     }
 
-    // Tạo cấu trúc giao diện hộp thoại thông báo modal đơn giản gồm nhãn văn bản đi kèm cặp nút tác vụ huỷ xác nhận
     public static VBox formatSimpleModal(String titleText, String subText, String cancelText, String confirmText, EventHandler<ActionEvent> cancelAction, EventHandler<ActionEvent> confirmAction) {
         VBox box = new VBox(16);
         box.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -180,7 +172,6 @@ public class format {
         return box;
     }
 
-    // Thiết lập cấu trúc đồ họa và định hình màu sắc hiển thị tiêu đề chỉ số cho hộp thẻ thống kê kpi
     public static VBox formatKPICard(String title, String value, String titleColor, String valColor) {
         VBox box = new VBox(4);
         box.setPadding(new Insets(20));
@@ -189,7 +180,6 @@ public class format {
         return box;
     }
 
-    // Khởi tạo và gán tệp css tạo phong cách thiết kế riêng cho đối tượng CheckBox khi được chọn hoặc hover
     public static CheckBox formatCheckBox(String text) {
         javafx.scene.control.CheckBox chk = new javafx.scene.control.CheckBox(text);
         chk.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
@@ -206,7 +196,6 @@ public class format {
         return chk;
     }
 
-    // Áp dụng thuộc tính nền trong suốt mờ nhòe giả lập hiệu ứng kính cường lực glassmorphism cho phân vùng region
     public static void formatGlass(Region region, int radius, double opacity) {
         region.setStyle(
                 "-fx-background-color: rgba(255,255,255," + opacity + ");" +
@@ -216,7 +205,6 @@ public class format {
         );
     }
 
-    // Khởi tạo cấu trúc khối dọc định dạng hộp thẻ chứa thông tin chung đi kèm hiệu ứng đổ bóng tím nhạt
     public static VBox formatBoxCard() {
         VBox box = new VBox(20);
         box.setPadding(new Insets(28));
@@ -231,14 +219,12 @@ public class format {
         return box;
     }
 
-    // Thiết lập thuộc tính đồ họa nền và bo góc cố định phục vụ cấu trúc ô chứa bảng danh sách dữ liệu
     public static VBox formatTableContainer() {
         VBox box = new VBox(12);
         box.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 40px; -fx-padding: 24; -fx-border-color: rgba(255,255,255,0.6); -fx-border-radius: 40px;");
         return box;
     }
 
-    // Khởi tạo các thông số chiều rộng, chính sách hiển thị thanh cuộn dọc và gán mã css tạo kiểu dáng thanh cuộn riêng biệt
     public static void formatScrollbar(ScrollPane scrollPane, VBox contentBox, int paddingRight) {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;");
@@ -254,7 +240,6 @@ public class format {
         scrollPane.getStylesheets().add("data:text/css," + css.replaceAll(" ", "%20"));
     }
 
-    // Cấu hình phông chữ mặc định, khoảng cách đệm lề và màu nền tím nhạt mờ cho thành phần ô nhập dữ liệu văn bản
     public static TextField formatTextField(String prompt) {
         TextField tf = new TextField();
         tf.setPromptText(prompt);
@@ -269,7 +254,6 @@ public class format {
         return tf;
     }
 
-    // Thiết lập kích thước, lề đệm văn bản và cấu trúc đồ họa biểu tượng đi kèm cho thành phần nút bấm danh mục điều hành
     public static Button formatNavBtn(String emoji, String title, boolean isSubItem) {
         Button btn = new Button();
         btn.setMaxWidth(Double.MAX_VALUE);
@@ -293,7 +277,6 @@ public class format {
         return btn;
     }
 
-    // Áp dụng định dạng kiểu dáng nền sáng nổi bật kèm hiệu ứng đổ bóng và chuyển màu tím đối với nút điều hướng đang chọn
     public static void formatNavBtnActive(Button btn) {
         btn.setStyle("-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.65) 100%); -fx-background-radius: 12px; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.12), 10, 0.4, 0, 4);");
         if (btn.getGraphic() instanceof HBox) {
@@ -303,7 +286,6 @@ public class format {
         }
     }
 
-    // Khôi phục trạng thái màu nền trong suốt và chuyển đổi nhãn chữ về tông màu xám slate đối với nút điều hướng không chọn
     public static void formatNavBtnInactive(Button btn) {
         btn.setStyle("-fx-background-color: transparent; -fx-background-radius: 12px;");
         if (btn.getGraphic() instanceof HBox) {
