@@ -5,15 +5,11 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import view.format;
 
@@ -32,7 +28,7 @@ public class dashboard extends ScrollPane {
                 buildHeader(),
                 buildStatsRow(),
                 buildTaskAndChartRow(),
-                buildMemberAndNotifRow()
+                buildNotifRow()
         );
 
         this.setContent(mainContent);
@@ -41,36 +37,53 @@ public class dashboard extends ScrollPane {
     private HBox buildHeader() {
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
-
         Label mainTitle = format.formatLabel("Tổng quan bộ phận " + deptName, FontWeight.BLACK, 28, "#1e293b");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button btnNotif = new Button("🔔");
-        btnNotif.setStyle("-fx-background-color: linear-gradient(to bottom right, #7c4dff, #448aff); -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 50%; -fx-min-width: 44px; -fx-min-height: 44px; -fx-effect: dropshadow(three-pass-box, rgba(124,77,255,0.4), 10, 0.3, 0, 4); -fx-cursor: hand;");
-
-        btnNotif.setOnMouseEntered(e -> { btnNotif.setScaleX(1.05); btnNotif.setScaleY(1.05); });
-        btnNotif.setOnMouseExited(e -> { btnNotif.setScaleX(1.0); btnNotif.setScaleY(1.0); });
-
-        btnNotif.setOnAction(e -> {
-            frame.getInstance().triggerToast("Chưa có thông báo mới.");
-        });
-
-        header.getChildren().addAll(mainTitle, spacer, btnNotif);
+        header.getChildren().addAll(mainTitle, spacer);
         return header;
     }
 
     private HBox buildStatsRow() {
         HBox row = new HBox(16);
-        row.getChildren().addAll(
-                createClickableKPICard("Nhân sự", "24 thành viên", "#64748b", "#1e293b", "Danh sách nhân sự"),
-                createClickableKPICard("Đang làm", "8 công việc", "#3b82f6", "#1e293b", "Công việc hiện tại"),
-                createClickableKPICard("Sắp tới hạn", "3 sự kiện", "#f59e0b", "#f59e0b", "Sự kiện sắp tới"),
-                createClickableKPICard("Quá hạn", "2 công việc", "#ef4444", "#ef4444", "Công việc quá hạn")
-        );
-        for (javafx.scene.Node node : row.getChildren()) { HBox.setHgrow(node, Priority.ALWAYS); }
+
+        VBox card1 = createStatCard("Nhân sự", "24 thành viên", "#475569", "#1e293b", "#a5b4fc", "👥");
+        VBox card2 = createStatCard("Công việc", "8 đã nhận", "#475569", "#3b82f6", "#bfdbfe", "⏳");
+        VBox card3 = createStatCard("Sự kiện", "3 đã nhận", "#475569", "#f59e0b", "#fde68a", "📅");
+
+        HBox.setHgrow(card1, Priority.ALWAYS);
+        HBox.setHgrow(card2, Priority.ALWAYS);
+        HBox.setHgrow(card3, Priority.ALWAYS);
+
+        row.getChildren().addAll(card1, card2, card3);
         return row;
+    }
+
+    private VBox createStatCard(String title, String value, String titleColor, String valColor, String iconBg, String iconEmoji) {
+        VBox box = format.formatBoxCard();
+        box.setPadding(new Insets(20));
+        box.setMinHeight(Region.USE_PREF_SIZE);
+
+        HBox content = new HBox();
+        content.setAlignment(Pos.CENTER_LEFT);
+
+        VBox textCol = new VBox(4);
+        textCol.getChildren().addAll(format.formatLabel(title, FontWeight.BOLD, 12, titleColor), format.formatLabel(value, FontWeight.BLACK, 24, valColor));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        StackPane iconContainer = new StackPane();
+        iconContainer.getChildren().addAll(new Circle(24, Color.web(iconBg)), format.formatLabel(iconEmoji, FontWeight.NORMAL, 20, "#000000"));
+
+        content.getChildren().addAll(textCol, spacer, iconContainer);
+        box.getChildren().add(content);
+
+        box.setStyle("-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 32px; -fx-border-width: 0px; -fx-border-color: transparent; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.05), 10, 0, 0, 4);");
+
+        return box;
     }
 
     private HBox buildTaskAndChartRow() {
@@ -80,15 +93,13 @@ public class dashboard extends ScrollPane {
         HBox.setHgrow(leftCol, Priority.ALWAYS);
         leftCol.setPrefWidth(850);
 
-        Label leftTitle = format.formatLabel("📋 Công việc ưu tiên", FontWeight.BLACK, 18, "#1e293b");
+        Label leftTitle = format.formatLabel("Công việc ưu tiên", FontWeight.BLACK, 18, "#1e293b");
 
         VBox tasksList = new VBox(20);
         tasksList.getChildren().addAll(
-                createWorkCard("Thiết kế Poster", "Workshop GitHub", "26/06/2026", "Cao", "Đang làm", true, false, 0.6),
-                createWorkCard("Viết bài nội bộ", "Việc chung", "29/06/2026", "Trung bình", "Chưa làm", false, true, 0.0),
-                createWorkCard("Chụp ảnh", "Team Building", "10/07/2026", "Cao", "Đang làm", false, false, 0.8),
-                createWorkCard("Duyệt kịch bản", "Họp CLB", "15/07/2026", "Thấp", "Đang làm", false, false, 0.3),
-                createWorkCard("Tổng hợp kinh phí", "Workshop GitHub", "25/06/2026", "Cao", "Chưa làm", true, false, 0.0)
+                createWorkCard("Thiết kế Poster", "Workshop GitHub", "26/06/2026", "Cao", "Đang tiến hành", true, 0.6),
+                createWorkCard("Viết bài nội bộ", "Việc chung", "29/06/2026", "Trung bình", "Chưa tiến hành", false, 0.0),
+                createWorkCard("Chụp ảnh", "Team Building", "10/07/2026", "Cao", "Đang tiến hành", false, 0.8)
         );
 
         ScrollPane tasksScroll = new ScrollPane(tasksList);
@@ -100,14 +111,14 @@ public class dashboard extends ScrollPane {
         VBox rightCol = format.formatBoxCard();
         rightCol.setPrefWidth(350);
 
-        Label rightTitle = format.formatLabel("📊 Tiến độ", FontWeight.BLACK, 18, "#1e293b");
+        Label rightTitle = format.formatLabel("Tiến độ", FontWeight.BLACK, 18, "#1e293b");
 
         PieChart pieChart = new PieChart();
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
-                new PieChart.Data("Đang làm", 8),
-                new PieChart.Data("Chưa làm", 5),
-                new PieChart.Data("Xong", 15),
-                new PieChart.Data("Hủy", 1)
+                new PieChart.Data("Đang tiến hành", 8),
+                new PieChart.Data("Chưa tiến hành", 5),
+                new PieChart.Data("Hoàn thành", 15),
+                new PieChart.Data("Quá hạn", 1)
         );
         pieChart.setData(pieChartData);
         pieChart.setLabelsVisible(false);
@@ -125,10 +136,10 @@ public class dashboard extends ScrollPane {
         legendBox.setAlignment(Pos.CENTER);
         legendBox.setPadding(new Insets(16, 0, 0, 0));
         legendBox.getChildren().addAll(
-                createLegendItem("#10b981", "Xong: 15"),
-                createLegendItem("#3b82f6", "Đang làm: 8"),
-                createLegendItem("#94a3b8", "Chưa làm: 5"),
-                createLegendItem("#ef4444", "Hủy: 1")
+                createLegendItem("#10b981", "Hoàn thành: 15"),
+                createLegendItem("#3b82f6", "Đang tiến hành: 8"),
+                createLegendItem("#94a3b8", "Chưa tiến hành: 5"),
+                createLegendItem("#ef4444", "Quá hạn: 1")
         );
 
         rightCol.getChildren().addAll(rightTitle, pieChart, legendBox);
@@ -137,74 +148,35 @@ public class dashboard extends ScrollPane {
         return row;
     }
 
-    private HBox buildMemberAndNotifRow() {
-        HBox row = new HBox(24);
+    private VBox buildNotifRow() {
+        VBox col = format.formatBoxCard();
+        VBox.setVgrow(col, Priority.ALWAYS);
 
-        VBox leftCol = format.formatBoxCard();
-        HBox.setHgrow(leftCol, Priority.ALWAYS);
-        leftCol.setPrefWidth(600);
+        Label title = format.formatLabel("Thông báo hệ thống", FontWeight.BLACK, 18, "#1e293b");
 
-        Label leftTitle = format.formatLabel("⭐ Nhân sự nổi bật", FontWeight.BLACK, 18, "#1e293b");
+        VBox notifTable = new VBox(0);
+        notifTable.getChildren().add(createNotifHeader());
 
-        VBox memberList = new VBox(12);
-        memberList.getChildren().addAll(
-                createTopMemberRow("trish.jpeg", "Nguyễn Văn A", "Trưởng nhóm", 6, 5),
-                createTopMemberRow("trish.jpeg", "Lê Thị B", "Thành viên cốt cán", 4, 4),
-                createTopMemberRow("trish.jpeg", "Trần Văn C", "Thành viên", 3, 3),
-                createTopMemberRow("trish.jpeg", "Phạm Thị D", "Thành viên mới", 2, 2),
-                createTopMemberRow("trish.jpeg", "Hoàng Văn E", "Thành viên", 2, 1)
+        VBox notifRows = new VBox(0);
+        notifRows.getChildren().addAll(
+                createNotifRow("28/06 14:35", "Ban Truyền thông vừa tạo sự kiện mới trên cổng quản lý."),
+                createNotifRow("28/06 08:00", "Tuyển thành viên K28 đã chính thức mở đơn ứng tuyển trực tuyến."),
+                createNotifRow("27/06 16:20", "Biên bản cuộc họp toàn thể tháng 6 đã được ban thư ký tải lên."),
+                createNotifRow("26/06 10:15", "Ban Tài chính yêu cầu duyệt khoản chi mua sắm thiết bị."),
+                createNotifRow("25/06 09:00", "Hệ thống chuẩn bị bảo trì vào 00:00 đêm nay.")
         );
 
-        ScrollPane memberScroll = new ScrollPane(memberList);
-        memberScroll.setPrefHeight(260);
-        format.formatScrollbar(memberScroll, memberList, 16);
+        ScrollPane notifScroll = new ScrollPane(notifRows);
+        notifScroll.setPrefHeight(220);
+        format.formatScrollbar(notifScroll, notifRows, 8);
 
-        leftCol.getChildren().addAll(leftTitle, memberScroll);
+        notifTable.getChildren().add(notifScroll);
 
-        VBox rightCol = format.formatBoxCard();
-        HBox.setHgrow(rightCol, Priority.ALWAYS);
-        rightCol.setPrefWidth(600);
-
-        Label rightTitle = format.formatLabel("📢 Thông báo", FontWeight.BLACK, 18, "#1e293b");
-
-        VBox notifList = new VBox(12);
-        notifList.getChildren().addAll(
-                createNotifRow("Đã khởi tạo sự kiện mới.", "#6366f1"),
-                createNotifRow("Mở đơn ứng tuyển thế hệ mới.", "#ec4899"),
-                createNotifRow("Cập nhật biên bản họp tháng 6.", "#f59e0b"),
-                createNotifRow("Yêu cầu duyệt chi thiết bị.", "#ef4444"),
-                createNotifRow("Hệ thống bảo trì lúc 00:00.", "#3b82f6")
-        );
-
-        ScrollPane notifScroll = new ScrollPane(notifList);
-        notifScroll.setPrefHeight(260);
-        format.formatScrollbar(notifScroll, notifList, 16);
-
-        rightCol.getChildren().addAll(rightTitle, notifScroll);
-
-        row.getChildren().addAll(leftCol, rightCol);
-        return row;
+        col.getChildren().addAll(title, notifTable);
+        return col;
     }
 
-    private VBox createClickableKPICard(String title, String value, String titleColor, String valColor, String filterTag) {
-        VBox box = format.formatKPICard(title, value, titleColor, valColor);
-        box.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 32px; -fx-border-width: 0px; -fx-border-color: transparent; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.05), 10, 0, 0, 4);");
-
-        box.setOnMouseEntered(e -> {
-            box.setScaleX(1.03);
-            box.setScaleY(1.03);
-            box.setStyle("-fx-background-color: rgba(255,255,255,0.85); -fx-background-radius: 32px; -fx-border-width: 0px; -fx-border-color: transparent; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.25), 25, 0.3, 0, 8);");
-        });
-        box.setOnMouseExited(e -> {
-            box.setScaleX(1.0);
-            box.setScaleY(1.0);
-            box.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 32px; -fx-border-width: 0px; -fx-border-color: transparent; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(49,27,146,0.05), 10, 0, 0, 4);");
-        });
-        box.setOnMouseClicked(e -> frame.getInstance().triggerToast("Lọc theo: " + filterTag));
-        return box;
-    }
-
-    private VBox createWorkCard(String title, String event, String deadline, String priority, String status, boolean isOverdue, boolean isNearDeadline, double progress) {
+    private VBox createWorkCard(String title, String event, String deadline, String priority, String status, boolean isOverdue, double progress) {
         VBox box = new VBox(16);
         box.setMaxWidth(Double.MAX_VALUE);
         box.setMinHeight(Region.USE_PREF_SIZE);
@@ -214,40 +186,40 @@ public class dashboard extends ScrollPane {
         HBox topRow = new HBox(12);
         topRow.setAlignment(Pos.CENTER_LEFT);
         Label lblTitle = format.formatLabel(title, FontWeight.BLACK, 18, "#1e293b");
+
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        String stBg = status.equals("Chưa làm") ? "rgba(100,116,139,0.15)" : status.equals("Đang làm") ? "rgba(59,130,246,0.15)" : status.equals("Xong") ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
-        String stText = status.equals("Chưa làm") ? "#64748b" : status.equals("Đang làm") ? "#3b82f6" : status.equals("Xong") ? "#10b981" : "#ef4444";
+        String stBg = status.equals("Chưa tiến hành") ? "rgba(100,116,139,0.15)" : status.equals("Đang tiến hành") ? "rgba(59,130,246,0.15)" : status.equals("Hoàn thành") ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)";
+        String stText = status.equals("Chưa tiến hành") ? "#64748b" : status.equals("Đang tiến hành") ? "#3b82f6" : status.equals("Hoàn thành") ? "#10b981" : "#ef4444";
 
         HBox badgeBox = new HBox(8);
         badgeBox.setAlignment(Pos.CENTER_RIGHT);
+
         Label statusBadge = format.formatBadge(status, stBg, stText);
         statusBadge.setStyle(statusBadge.getStyle() + "-fx-font-size: 11px; -fx-padding: 4 10;");
         badgeBox.getChildren().add(statusBadge);
 
-        if (isOverdue && !status.equals("Xong") && !status.equals("Hủy")) {
-            Label overdueBadge = format.formatBadge("⚠ Quá hạn", "rgba(239,68,68,0.15)", "#ef4444");
+        if (isOverdue && !status.equals("Hoàn thành")) {
+            Label overdueBadge = format.formatBadge("Quá hạn", "rgba(239,68,68,0.15)", "#ef4444");
             overdueBadge.setStyle(overdueBadge.getStyle() + "-fx-font-size: 11px; -fx-padding: 4 10;");
             badgeBox.getChildren().add(0, overdueBadge);
-        } else if (isNearDeadline && !status.equals("Xong") && !status.equals("Hủy")) {
-            Label nearBadge = format.formatBadge("⏰ Gần hạn", "rgba(245,158,11,0.15)", "#f59e0b");
-            nearBadge.setStyle(nearBadge.getStyle() + "-fx-font-size: 11px; -fx-padding: 4 10;");
-            badgeBox.getChildren().add(0, nearBadge);
         }
 
         topRow.getChildren().addAll(lblTitle, spacer, badgeBox);
 
         GridPane infoGrid = new GridPane();
         infoGrid.setHgap(24); infoGrid.setVgap(8);
-        String eventLabel = event.equals("Việc chung") ? "🏢 Việc chung" : "📅 " + event;
+
+        String eventLabel = event.equals("Việc chung") ? "Việc chung" : event;
         infoGrid.add(format.formatLabel(eventLabel, FontWeight.BOLD, 13, event.equals("Việc chung") ? "#94a3b8" : "#7c4dff"), 0, 0, 2, 1);
-        infoGrid.add(format.formatLabel("⏳ Hạn: " + deadline, FontWeight.BOLD, 13, isOverdue ? "#ef4444" : "#475569"), 0, 1);
+        infoGrid.add(format.formatLabel("Hạn: " + deadline, FontWeight.BOLD, 13, isOverdue ? "#ef4444" : "#475569"), 0, 1);
 
         String prioColor = priority.equals("Cao") ? "#ef4444" : priority.equals("Trung bình") ? "#f59e0b" : "#10b981";
-        infoGrid.add(format.formatLabel("🔥 Ưu tiên: " + priority, FontWeight.BOLD, 13, prioColor), 1, 1);
+        infoGrid.add(format.formatLabel("Ưu tiên: " + priority, FontWeight.BOLD, 13, prioColor), 1, 1);
 
         HBox progressRow = new HBox(16);
         progressRow.setAlignment(Pos.CENTER_LEFT);
+
         Label lblProgText = format.formatLabel((int)(progress * 100) + "%", FontWeight.BLACK, 13, "#7c4dff");
         lblProgText.setPrefWidth(40);
 
@@ -262,27 +234,13 @@ public class dashboard extends ScrollPane {
         bar.setPrefHeight(15);
         bar.setStyle("-fx-background-color: linear-gradient(to right, #448aff, #7c4dff); -fx-background-radius: 15px;");
         bar.maxWidthProperty().bind(track.widthProperty().multiply(progress));
+
         track.getChildren().add(bar);
 
         progressRow.getChildren().addAll(lblProgText, track);
 
-        HBox actionsRow = new HBox(12);
-        actionsRow.setAlignment(Pos.CENTER_RIGHT);
+        box.getChildren().addAll(topRow, infoGrid, progressRow);
 
-        Button btnView = new Button("Chi tiết");
-        btnView.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
-        btnView.setTextFill(Color.WHITE);
-        btnView.setStyle("-fx-background-color: #5020d8; -fx-background-radius: 20px; -fx-padding: 8 20; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(80,32,216,0.4), 10, 0, 0, 4);");
-        btnView.setOnMouseEntered(e -> { btnView.setScaleX(1.05); btnView.setScaleY(1.05); });
-        btnView.setOnMouseExited(e -> { btnView.setScaleX(1.0); btnView.setScaleY(1.0); });
-
-        btnView.setOnAction(e -> {
-            frame.getInstance().triggerToast("Xem chi tiết: " + title);
-        });
-
-        actionsRow.getChildren().add(btnView);
-
-        box.getChildren().addAll(topRow, infoGrid, progressRow, actionsRow);
         return box;
     }
 
@@ -290,56 +248,46 @@ public class dashboard extends ScrollPane {
         HBox box = new HBox(8);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setMaxWidth(160);
+
         Circle dot = new Circle(6, Color.web(colorHex));
         Label lbl = format.formatLabel(text, FontWeight.BOLD, 13, "#1e293b");
+
         box.getChildren().addAll(dot, lbl);
         return box;
     }
 
-    private HBox createTopMemberRow(String avatarUrl, String name, String role, int doing, int done) {
+    private HBox createNotifHeader() {
+        HBox header = new HBox(16);
+        header.setPadding(new Insets(12, 16, 12, 16));
+        header.setStyle("-fx-border-color: transparent transparent rgba(0,0,0,0.1) transparent; -fx-border-width: 1px;");
+
+        Label l1 = format.formatLabel("THỜI GIAN", FontWeight.BLACK, 10, "#94a3b8");
+        l1.setPrefWidth(130);
+        l1.setMinWidth(130);
+
+        Label l2 = format.formatLabel("NỘI DUNG", FontWeight.BLACK, 10, "#94a3b8");
+        HBox.setHgrow(l2, Priority.ALWAYS);
+        l2.setMaxWidth(Double.MAX_VALUE);
+
+        header.getChildren().addAll(l1, l2);
+        return header;
+    }
+
+    private HBox createNotifRow(String time, String content) {
         HBox row = new HBox(16);
         row.setPadding(new Insets(12, 16, 12, 16));
         row.setAlignment(Pos.CENTER_LEFT);
-        format.formatGlass(row, 16, 0.4);
-        row.setMaxWidth(Double.MAX_VALUE);
+        row.setStyle("-fx-border-color: transparent transparent rgba(0,0,0,0.05) transparent; -fx-border-width: 1px;");
 
-        ImageView avatar = new ImageView(new Image(avatarUrl));
-        avatar.setFitWidth(44); avatar.setFitHeight(44);
-        avatar.setClip(new Circle(22, 22, 22));
+        Label lblTime = format.formatLabel(time, FontWeight.BOLD, 12, "#64748b");
+        lblTime.setPrefWidth(130);
+        lblTime.setMinWidth(130);
 
-        VBox info = new VBox(4);
-        info.getChildren().addAll(
-                format.formatLabel(name, FontWeight.BOLD, 14, "#1e293b"),
-                format.formatLabel(role, FontWeight.BOLD, 11, "#7c4dff")
-        );
+        Label lblContent = format.formatLabel(content, FontWeight.MEDIUM, 13, "#1e293b");
+        lblContent.setWrapText(true);
+        HBox.setHgrow(lblContent, Priority.ALWAYS);
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        VBox stats = new VBox(4);
-        stats.setAlignment(Pos.CENTER_RIGHT);
-        stats.getChildren().addAll(
-                format.formatLabel(doing + " việc", FontWeight.BOLD, 12, "#3b82f6"),
-                format.formatLabel(done + " xong", FontWeight.BOLD, 12, "#10b981")
-        );
-
-        row.getChildren().addAll(avatar, info, spacer, stats);
+        row.getChildren().addAll(lblTime, lblContent);
         return row;
-    }
-
-    private HBox createNotifRow(String text, String dotColor) {
-        HBox box = new HBox(12);
-        box.setAlignment(Pos.CENTER_LEFT);
-        box.setPadding(new Insets(16));
-        format.formatGlass(box, 16, 0.6);
-        box.setMaxWidth(Double.MAX_VALUE);
-        box.setMinHeight(Region.USE_PREF_SIZE);
-
-        Label content = format.formatLabel(text, FontWeight.NORMAL, 13, "#334155");
-        content.setWrapText(true);
-        HBox.setHgrow(content, Priority.ALWAYS);
-
-        box.getChildren().addAll(new Circle(4, Color.web(dotColor)), content);
-        return box;
     }
 }

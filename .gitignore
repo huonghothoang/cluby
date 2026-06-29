@@ -1,0 +1,5 @@
+.env
+config.properties
+.idea/
+out/
+*.iml

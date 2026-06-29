@@ -31,12 +31,12 @@ public class login extends Application {
     private StackPane modalOverlay;
     private VBox toastContainer;
     private HBox mainLayout;
-
     private VBox formContainerBox;
 
     @Override
     public void start(Stage primaryStage) {
         instance = this;
+
         rootPane = new StackPane();
 
         Pane backgroundPane = new Pane();
@@ -46,6 +46,7 @@ public class login extends Application {
                 new Stop(0.7, Color.web("#fce5de")),
                 new Stop(1.0, Color.web("#d7c7f5"))
         };
+
         LinearGradient bgGrad = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE, stops);
         backgroundPane.setBackground(new Background(new BackgroundFill(bgGrad, CornerRadii.EMPTY, Insets.EMPTY)));
 
@@ -67,14 +68,13 @@ public class login extends Application {
 
         rootPane.getChildren().add(backgroundPane);
 
-        mainLayout = new HBox();
+        // Đã tăng khoảng cách giữa 2 phần từ 80 lên 100
+        mainLayout = new HBox(100);
         mainLayout.setPrefSize(1366, 800);
         mainLayout.setAlignment(Pos.CENTER);
 
         VBox leftPane = new VBox(24);
         leftPane.setAlignment(Pos.CENTER);
-        leftPane.setPrefWidth(683);
-        HBox.setHgrow(leftPane, Priority.ALWAYS);
 
         ImageView hugeLogo = new ImageView(new Image("cluby.png"));
         hugeLogo.setFitWidth(250);
@@ -90,16 +90,12 @@ public class login extends Application {
 
         VBox rightPane = new VBox();
         rightPane.setAlignment(Pos.CENTER);
-        rightPane.setPrefWidth(683);
-        HBox.setHgrow(rightPane, Priority.ALWAYS);
 
         formContainerBox = new VBox();
         formContainerBox.setAlignment(Pos.CENTER);
-
         formContainerBox.setPrefSize(450, 600);
         formContainerBox.setMinSize(450, 600);
         formContainerBox.setMaxSize(450, 600);
-
         formContainerBox.setPadding(new Insets(40));
         formContainerBox.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 40px;");
         formContainerBox.setEffect(new DropShadow(45, 0, 16, Color.web("#311b92", 0.15)));
@@ -116,10 +112,8 @@ public class login extends Application {
 
         toastContainer = new VBox(8);
         toastContainer.setMaxSize(300, 200);
-
         toastContainer.setPickOnBounds(false);
         toastContainer.setMouseTransparent(true);
-
         StackPane.setAlignment(toastContainer, Pos.BOTTOM_RIGHT);
         StackPane.setMargin(toastContainer, new Insets(0, 30, 30, 0));
 
@@ -146,15 +140,26 @@ public class login extends Application {
         TextField fEmail = format.formatTextField("Email hoặc mã định danh...");
         PasswordField fPass = createPasswordField("Mật khẩu...");
 
+        HBox passHeader = new HBox();
+        passHeader.setAlignment(Pos.CENTER_LEFT);
+        Label lblPass = format.formatLabel("Mật khẩu", FontWeight.BOLD, 12, "#94a3b8");
+        Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
+        Hyperlink linkForgot = new Hyperlink("Quên mật khẩu?");
+        linkForgot.setFont(Font.font("Google Sans", FontWeight.BOLD, 11));
+        linkForgot.setTextFill(Color.web("#5020d8"));
+        linkForgot.setBorder(Border.EMPTY);
+        linkForgot.setPadding(new Insets(0));
+        linkForgot.setOnAction(e -> showCustomModal(createForgotPasswordModal_Step1()));
+        passHeader.getChildren().addAll(lblPass, sp, linkForgot);
+
         fields.getChildren().addAll(
                 new VBox(6, format.formatLabel("Tài khoản", FontWeight.BOLD, 12, "#94a3b8"), fEmail),
-                new VBox(6, format.formatLabel("Mật khẩu", FontWeight.BOLD, 12, "#94a3b8"), fPass)
+                new VBox(6, passHeader, fPass)
         );
 
-        Button btnLogin = getShadowBtn("Đăng nhập", "", "#5020d8", "white", "rgba(80,32,216,0.4)");
+        Button btnLogin = getShadowBtn("Đăng nhập", "#5020d8", "white", "rgba(80,32,216,0.4)");
         btnLogin.setPrefWidth(Double.MAX_VALUE);
         btnLogin.setPrefHeight(48);
-
         btnLogin.setOnAction(e -> {
             if (fEmail.getText().trim().isEmpty() || fPass.getText().trim().isEmpty()) {
                 triggerToast("Vui lòng điền đủ thông tin");
@@ -192,30 +197,26 @@ public class login extends Application {
         header.setPadding(new Insets(0, 0, 8, 0));
 
         VBox fields = new VBox(12);
-
         String generatedId = "26MB" + String.format("%03d", (int)(Math.random() * 999));
+
         TextField fId = format.formatTextField(generatedId);
         fId.setDisable(true);
-
         TextField fName = format.formatTextField("Họ và tên...");
-
         TextField fEmail = format.formatTextField("Địa chỉ email...");
         Label emailNote = format.formatLabel("Hệ thống chỉ chấp nhận email chưa từng đăng ký.", FontWeight.BOLD, 10, "#ef4444");
-        VBox emailBox = new VBox(6, format.formatLabel("Email *", FontWeight.BOLD, 12, "#94a3b8"), fEmail, emailNote);
-
+        VBox emailBox = new VBox(6, format.formatLabel("Email", FontWeight.BOLD, 12, "#94a3b8"), fEmail, emailNote);
         PasswordField fPass = createPasswordField("Mật khẩu...");
 
         fields.getChildren().addAll(
                 new VBox(6, format.formatLabel("Mã định danh hệ thống cấp", FontWeight.BOLD, 12, "#94a3b8"), fId),
-                new VBox(6, format.formatLabel("Họ và tên *", FontWeight.BOLD, 12, "#94a3b8"), fName),
+                new VBox(6, format.formatLabel("Họ và tên", FontWeight.BOLD, 12, "#94a3b8"), fName),
                 emailBox,
-                new VBox(6, format.formatLabel("Mật khẩu *", FontWeight.BOLD, 12, "#94a3b8"), fPass)
+                new VBox(6, format.formatLabel("Mật khẩu", FontWeight.BOLD, 12, "#94a3b8"), fPass)
         );
 
-        Button btnRegister = getShadowBtn("Đăng ký", "", "#3b82f6", "white", "rgba(59,130,246,0.4)");
+        Button btnRegister = getShadowBtn("Đăng ký", "#3b82f6", "white", "rgba(59,130,246,0.4)");
         btnRegister.setPrefWidth(Double.MAX_VALUE);
         btnRegister.setPrefHeight(45);
-
         btnRegister.setOnAction(e -> {
             if (fName.getText().trim().isEmpty() || fEmail.getText().trim().isEmpty() || fPass.getText().trim().isEmpty()) {
                 triggerToast("Vui lòng điền đủ thông tin bắt buộc");
@@ -227,8 +228,8 @@ public class login extends Application {
         HBox switchRow = new HBox(8);
         switchRow.setAlignment(Pos.CENTER);
         switchRow.setPadding(new Insets(12, 0, 0, 0));
-        Label l1 = format.formatLabel("Đã có tài khoản?", FontWeight.MEDIUM, 14, "#64748b");
 
+        Label l1 = format.formatLabel("Đã có tài khoản?", FontWeight.MEDIUM, 14, "#64748b");
         Hyperlink linkLogin = new Hyperlink("Đăng nhập");
         linkLogin.setFont(Font.font("Google Sans", FontWeight.BOLD, 14));
         linkLogin.setTextFill(Color.web("#5020d8"));
@@ -239,6 +240,134 @@ public class login extends Application {
         switchRow.getChildren().addAll(l1, linkLogin);
 
         box.getChildren().addAll(header, fields, btnRegister, switchRow);
+        return box;
+    }
+
+    // Modal 1: Nhập Email
+    private VBox createForgotPasswordModal_Step1() {
+        VBox box = new VBox(20);
+        box.setPrefWidth(450);
+        box.setMaxSize(450, Region.USE_PREF_SIZE);
+        box.setPadding(new Insets(32));
+        box.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
+        box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+        Label title = format.formatLabel("Quên mật khẩu?", FontWeight.BLACK, 24, "#1e293b");
+        Label desc = format.formatLabel("Để đổi mật khẩu, chúng tôi cần xác minh tài khoản của bạn, vui lòng điền email của tài khoản của bạn để chúng tôi gửi mã xác thực.", FontWeight.MEDIUM, 13, "#64748b");
+        desc.setWrapText(true);
+
+        TextField fEmail = format.formatTextField("Nhập email của bạn...");
+        VBox emailGroup = new VBox(6, format.formatLabel("Email xác minh", FontWeight.BOLD, 12, "#94a3b8"), fEmail);
+
+        HBox actions = new HBox(12);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(8, 0, 0, 0));
+        Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        btnCancel.setOnAction(e -> closeOverlayModal());
+        Button btnSend = getModalActionBtn("Gửi", "#5020d8", "white", "rgba(80,32,216,0.4)");
+
+        btnSend.setOnAction(e -> {
+            String email = fEmail.getText().trim();
+            if (email.isEmpty()) {
+                triggerToast("Vui lòng nhập email");
+                return;
+            }
+            if (!email.contains("@")) {
+                triggerToast("Không tìm thấy tài khoản nào khớp với email của bạn");
+                return;
+            }
+            triggerToast("Đã gửi mã xác thực");
+            showCustomModal(createForgotPasswordModal_Step2(email));
+        });
+
+        actions.getChildren().addAll(btnCancel, btnSend);
+        box.getChildren().addAll(title, desc, emailGroup, actions);
+
+        return box;
+    }
+
+    // Modal 2: Nhập OTP
+    private VBox createForgotPasswordModal_Step2(String email) {
+        VBox box = new VBox(20);
+        box.setPrefWidth(450);
+        box.setMaxSize(450, Region.USE_PREF_SIZE);
+        box.setPadding(new Insets(32));
+        box.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
+        box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+        Label title = format.formatLabel("Nhập mã xác thực", FontWeight.BLACK, 24, "#1e293b");
+        Label desc = format.formatLabel("Mã xác nhận gồm 6 chữ số đã được gửi tới email " + email + " của bạn.", FontWeight.MEDIUM, 13, "#64748b");
+        desc.setWrapText(true);
+
+        TextField fOtp = format.formatTextField("Mã OTP...");
+        VBox otpGroup = new VBox(6, format.formatLabel("Mã xác thực", FontWeight.BOLD, 12, "#94a3b8"), fOtp);
+
+        HBox actions = new HBox(12);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(8, 0, 0, 0));
+        Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        btnCancel.setOnAction(e -> closeOverlayModal());
+        Button btnVerify = getModalActionBtn("Xác thực", "#10b981", "white", "rgba(16,185,129,0.4)");
+
+        btnVerify.setOnAction(e -> {
+            if(fOtp.getText().trim().isEmpty()){
+                triggerToast("Vui lòng nhập mã xác thực");
+                return;
+            }
+            triggerToast("Xác minh thành công");
+            showCustomModal(createForgotPasswordModal_Step3());
+        });
+
+        actions.getChildren().addAll(btnCancel, btnVerify);
+        box.getChildren().addAll(title, desc, otpGroup, actions);
+
+        return box;
+    }
+
+    // Modal 3: Đổi mật khẩu
+    private VBox createForgotPasswordModal_Step3() {
+        VBox box = new VBox(20);
+        box.setPrefWidth(450);
+        box.setMaxSize(450, Region.USE_PREF_SIZE);
+        box.setPadding(new Insets(32));
+        box.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
+        box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+        Label title = format.formatLabel("Đổi mật khẩu", FontWeight.BLACK, 24, "#1e293b");
+        Label desc = format.formatLabel("Vui lòng nhập mật khẩu mới cho tài khoản của bạn.", FontWeight.MEDIUM, 13, "#64748b");
+        desc.setWrapText(true);
+
+        PasswordField fNew = createPasswordField("Mật khẩu mới...");
+        PasswordField fConfirm = createPasswordField("Xác minh mật khẩu mới...");
+
+        VBox fields = new VBox(12,
+                new VBox(6, format.formatLabel("Mật khẩu mới", FontWeight.BOLD, 12, "#94a3b8"), fNew),
+                new VBox(6, format.formatLabel("Xác minh mật khẩu", FontWeight.BOLD, 12, "#94a3b8"), fConfirm)
+        );
+
+        HBox actions = new HBox(12);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(8, 0, 0, 0));
+        Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        btnCancel.setOnAction(e -> closeOverlayModal());
+        Button btnSubmitPass = getModalActionBtn("Lưu thay đổi", "#3b82f6", "white", "rgba(59,130,246,0.4)");
+
+        btnSubmitPass.setOnAction(e -> {
+            if(fNew.getText().isEmpty() || fConfirm.getText().isEmpty()) {
+                triggerToast("Vui lòng điền đủ thông tin");
+                return;
+            }
+            if(!fNew.getText().equals(fConfirm.getText())) {
+                triggerToast("Mật khẩu xác minh không khớp");
+                return;
+            }
+            triggerToast("Đã đổi mật khẩu thành công!");
+            closeOverlayModal();
+        });
+
+        actions.getChildren().addAll(btnCancel, btnSubmitPass);
+        box.getChildren().addAll(title, desc, fields, actions);
+
         return box;
     }
 
@@ -253,24 +382,24 @@ public class login extends Application {
         box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
         Label title = format.formatLabel("Đăng ký hoàn tất", FontWeight.BLACK, 24, "#5020d8");
-
         Label sub = format.formatLabel("Mã định danh tài khoản của bạn:", FontWeight.MEDIUM, 13, "#64748b");
         sub.setWrapText(true); sub.setAlignment(Pos.CENTER); sub.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-
         Label idLabel = format.formatLabel(generatedId, FontWeight.BLACK, 32, "#3b82f6");
-
-        Label note = format.formatLabel("Vui lòng đợi quản trị viên phê duyệt hồ sơ.", FontWeight.MEDIUM, 12, "#94a3b8");
+        Label note = format.formatLabel("Bạn có thể dùng mã định danh hoặc email để đăng nhập sau này.", FontWeight.MEDIUM, 12, "#94a3b8");
         note.setWrapText(true); note.setAlignment(Pos.CENTER); note.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
-        Button btnNext = getShadowBtn("Quay lại đăng nhập", "", "#5020d8", "white", "rgba(80,32,216,0.4)");
-        btnNext.setPrefWidth(Double.MAX_VALUE);
-        btnNext.setPrefHeight(45);
+        HBox actions = new HBox();
+        actions.setPadding(new Insets(8, 0, 0, 0));
+        Button btnNext = getModalActionBtn("Đăng nhập", "#5020d8", "white", "rgba(80,32,216,0.4)");
+        btnNext.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(btnNext, Priority.ALWAYS);
         btnNext.setOnAction(e -> {
             closeOverlayModal();
             formContainerBox.getChildren().setAll(createLoginForm());
         });
+        actions.getChildren().add(btnNext);
 
-        box.getChildren().addAll(title, sub, idLabel, note, btnNext);
+        box.getChildren().addAll(title, sub, idLabel, note, actions);
         return box;
     }
 
@@ -288,21 +417,25 @@ public class login extends Application {
         return pf;
     }
 
-    private Button getShadowBtn(String text, String icon, String bgColor, String textColor, String shadowColor) {
-        Button btn = new Button();
-        HBox content = new HBox(8);
-        content.setAlignment(Pos.CENTER);
-        if (!icon.isEmpty()) {
-            Label lblIcon = new Label(icon); lblIcon.setTextFill(Color.web(textColor));
-            content.getChildren().add(lblIcon);
-        }
-        Label lblText = new Label(text);
-        lblText.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
-        lblText.setTextFill(Color.web(textColor));
-        content.getChildren().add(lblText);
-        btn.setGraphic(content);
-        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 10 20 10 20; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
+    private Button getShadowBtn(String text, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button(text);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(textColor));
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 10 24; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
         btn.setOnMouseEntered(e -> { btn.setScaleX(1.03); btn.setScaleY(1.03); });
+        btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
+        return btn;
+    }
+
+    private Button getModalActionBtn(String text, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button(text);
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setPrefHeight(45);
+        HBox.setHgrow(btn, Priority.ALWAYS);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(textColor));
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 20px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
+        btn.setOnMouseEntered(e -> { btn.setScaleX(1.02); btn.setScaleY(1.02); });
         btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
         return btn;
     }

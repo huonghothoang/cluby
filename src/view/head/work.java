@@ -5,8 +5,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -26,13 +24,14 @@ public class work extends ScrollPane {
         dashboardContent.setStyle("-fx-background-color: transparent;");
 
         HBox kpiRow = new HBox(16);
-        kpiRow.getChildren().addAll(
-                format.formatKPICard("Công việc được giao", "8", "#64748b", "#1e293b"),
-                format.formatKPICard("🔵 Đang thực hiện", "5", "#3b82f6", "#1e293b"),
-                format.formatKPICard("🟢 Đã hoàn thành", "2", "#10b981", "#1e293b"),
-                format.formatKPICard("🔴 Quá hạn", "1", "#ef4444", "#ef4444")
-        );
-        for (Node node : kpiRow.getChildren()) { HBox.setHgrow(node, Priority.ALWAYS); }
+        VBox card1 = createStatCard("Công việc được giao", "8", "#475569", "#1e293b", "#a5b4fc", "📝");
+        VBox card2 = createStatCard("Đang tiến hành", "5", "#475569", "#3b82f6", "#bfdbfe", "⏳");
+        VBox card3 = createStatCard("Hoàn thành", "2", "#475569", "#10b981", "#a7f3d0", "✅");
+        VBox card4 = createStatCard("Quá hạn", "1", "#475569", "#ef4444", "#fca5a5", "⚠");
+
+        HBox.setHgrow(card1, Priority.ALWAYS); HBox.setHgrow(card2, Priority.ALWAYS);
+        HBox.setHgrow(card3, Priority.ALWAYS); HBox.setHgrow(card4, Priority.ALWAYS);
+        kpiRow.getChildren().addAll(card1, card2, card3, card4);
 
         HBox filterBar = new HBox(16);
         filterBar.setAlignment(Pos.CENTER_LEFT);
@@ -45,30 +44,38 @@ public class work extends ScrollPane {
         Button btnSearch = format.formatFindBtn();
         searchBox.getChildren().addAll(searchField, btnSearch);
 
-        ComboBox<String> cbTimeSort = format.formatSortBtn("Sắp xếp thời gian", "Mới nhất", "Cũ nhất");
-        ComboBox<String> cbStatusFilter = format.formatSortBtn("Lọc trạng thái", "Tất cả", "Chưa bắt đầu", "Đang thực hiện", "Hoàn thành", "Quá hạn");
+        ComboBox<String> cbTimeSort = format.formatSortBtn("Sắp xếp", "Mới nhất", "Cũ nhất");
+        ComboBox<String> cbStatusSort = format.formatSortBtn("Trạng thái", "Tất cả", "Chưa tiến hành", "Đang tiến hành", "Hoàn thành", "Quá hạn");
+        fixHover(cbTimeSort); fixHover(cbStatusSort);
 
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        filterBar.getChildren().addAll(searchBox, cbTimeSort, cbStatusFilter, spacer);
+        Button btnGuide = getShadowBtn("Hướng dẫn tính", "rgba(245,158,11,0.15)", "#f59e0b", "rgba(0,0,0,0.05)");
+        btnGuide.setOnAction(e -> {
+            StackPane guideModal = createGuideModal();
+            frame.getInstance().showCustomModal(guideModal);
+        });
+
+        filterBar.getChildren().addAll(searchBox, cbTimeSort, cbStatusSort, spacer, btnGuide);
 
         VBox workTableContainer = format.formatTableContainer();
-        Label tableTitle = format.formatLabel("📋 DANH SÁCH QUẢN LÝ CÔNG VIỆC ĐÃ GIAO", FontWeight.BLACK, 14, "#1e293b");
+        Label tableTitle = format.formatLabel("DANH SÁCH QUẢN LÝ CÔNG VIỆC", FontWeight.BLACK, 14, "#1e293b");
         tableTitle.setPadding(new Insets(12, 16, 0, 16));
         workTableContainer.getChildren().addAll(tableTitle, createWorkTableHeader());
 
         VBox workRows = new VBox(4);
         workRows.getChildren().addAll(
-                createWorkRow("Thiết kế Poster Workshop", "Workshop GitHub", "28/06/2026", "Đang thực hiện", "Cao", false, 0.44),
-                createWorkRow("Chuẩn bị bài đăng Fanpage", "Workshop GitHub", "25/06/2026", "Đang thực hiện", "Trung bình", true, 0.20),
-                createWorkRow("Chụp ảnh Profile Ban", "Không thuộc sự kiện", "20/06/2026", "Hoàn thành", "Thấp", false, 1.0),
-                createWorkRow("Quay video Teaser", "Team Building", "10/07/2026", "Chưa bắt đầu", "Cao", false, 0.0)
+                createWorkRow("Thiết kế Poster Workshop", "Workshop GitHub", "28/06/2026", "Đang tiến hành", "Cao", false, 0.44),
+                createWorkRow("Chuẩn bị bài đăng Fanpage", "Workshop GitHub", "25/06/2026", "Đang tiến hành", "Trung bình", true, 0.20),
+                createWorkRow("Chụp ảnh Profile Ban", "Không", "20/06/2026", "Hoàn thành", "Thấp", false, 1.0),
+                createWorkRow("Quay video Teaser", "Team Building", "10/07/2026", "Chưa tiến hành", "Cao", false, 0.0)
         );
 
         ScrollPane workScroll = new ScrollPane(workRows);
         workScroll.setPrefHeight(300);
         format.formatScrollbar(workScroll, workRows, 8);
         applySmoothScroll(workScroll, workRows);
+
         workTableContainer.getChildren().add(workScroll);
 
         dashboardContent.getChildren().addAll(kpiRow, filterBar, workTableContainer);
@@ -91,6 +98,42 @@ public class work extends ScrollPane {
         });
     }
 
+    private void fixHover(Node node) {
+        node.setOnMouseEntered(e -> node.setOpacity(0.7));
+        node.setOnMouseExited(e -> {
+            node.setOpacity(1.0);
+            node.setScaleX(1.0);
+            node.setScaleY(1.0);
+        });
+        if (node instanceof ComboBox) {
+            ((ComboBox<?>) node).setOnShowing(e -> {
+                node.setOpacity(1.0);
+                node.setScaleX(1.0);
+                node.setScaleY(1.0);
+            });
+            ((ComboBox<?>) node).setOnHidden(e -> {
+                node.setOpacity(1.0);
+            });
+        }
+    }
+
+    private VBox createStatCard(String title, String value, String titleColor, String valColor, String iconBg, String iconEmoji) {
+        VBox box = format.formatBoxCard();
+        box.setPadding(new Insets(20));
+        box.setMinHeight(Region.USE_PREF_SIZE);
+        HBox content = new HBox();
+        content.setAlignment(Pos.CENTER_LEFT);
+        VBox textCol = new VBox(4);
+        textCol.getChildren().addAll(format.formatLabel(title, FontWeight.BOLD, 12, titleColor), format.formatLabel(value, FontWeight.BLACK, 28, valColor));
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        StackPane iconContainer = new StackPane();
+        iconContainer.getChildren().addAll(new Circle(24, Color.web(iconBg)), format.formatLabel(iconEmoji, FontWeight.NORMAL, 20, "#000000"));
+        content.getChildren().addAll(textCol, spacer, iconContainer);
+        box.getChildren().add(content);
+        return box;
+    }
+
     private HBox createWorkTableHeader() {
         HBox header = new HBox(16);
         header.setPadding(new Insets(12, 16, 12, 16));
@@ -101,7 +144,7 @@ public class work extends ScrollPane {
         Label l3 = format.formatLabel("HẠN CHÓT", FontWeight.BLACK, 10, "#94a3b8"); l3.setPrefWidth(110);
         Label l4 = format.formatLabel("MỨC ƯU TIÊN", FontWeight.BLACK, 10, "#94a3b8"); l4.setPrefWidth(110);
         Label l5 = format.formatLabel("TIẾN ĐỘ THỰC TẾ", FontWeight.BLACK, 10, "#94a3b8"); l5.setPrefWidth(180);
-        Label l6 = format.formatLabel("THAO TÁC", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(80);
+        Label l6 = format.formatLabel("CHI TIẾT", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(80);
 
         header.getChildren().addAll(l1, l2, l3, l4, l5, l6);
         return header;
@@ -112,28 +155,32 @@ public class work extends ScrollPane {
         row.setPadding(new Insets(12, 16, 12, 16));
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent rgba(255,255,255,0.3) transparent; -fx-border-width: 1px; -fx-cursor: hand;");
+
         row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: rgba(255,255,255,0.6); -fx-border-color: transparent transparent rgba(255,255,255,0.3) transparent; -fx-border-width: 1px; -fx-cursor: hand; -fx-background-radius: 12px;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent rgba(255,255,255,0.3) transparent; -fx-border-width: 1px; -fx-cursor: hand;"));
 
         VBox titleLayout = new VBox(4);
         titleLayout.setPrefWidth(220);
+
         Label lblTitle = format.formatLabel(title, FontWeight.BOLD, 14, "#1e293b"); lblTitle.setWrapText(true);
 
-        String stBg = status.equals("Chưa bắt đầu") ? "rgba(100,116,139,0.12)" : status.equals("Đang thực hiện") ? "rgba(59,130,246,0.12)" : status.equals("Hoàn thành") ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)";
-        String stText = status.equals("Chưa bắt đầu") ? "#64748b" : status.equals("Đang thực hiện") ? "#3b82f6" : status.equals("Hoàn thành") ? "#10b981" : "#ef4444";
+        String stBg = status.equals("Chưa tiến hành") ? "rgba(100,116,139,0.12)" : status.equals("Đang tiến hành") ? "rgba(59,130,246,0.12)" : "rgba(16,185,129,0.12)";
+        String stText = status.equals("Chưa tiến hành") ? "#64748b" : status.equals("Đang tiến hành") ? "#3b82f6" : "#10b981";
+
         Label statusBadge = format.formatBadge(status, stBg, stText);
         statusBadge.setStyle(statusBadge.getStyle() + "-fx-font-size: 10px; -fx-padding: 2 6;");
 
         HBox badges = new HBox(6, statusBadge);
+
         if (isOverdue && !status.equals("Hoàn thành")) {
-            Label overdueBadge = format.formatBadge("⚠ Quá hạn", "rgba(239,68,68,0.12)", "#ef4444");
+            Label overdueBadge = format.formatBadge("Quá hạn", "rgba(239,68,68,0.12)", "#ef4444");
             overdueBadge.setStyle(overdueBadge.getStyle() + "-fx-font-size: 10px; -fx-padding: 2 6;");
             badges.getChildren().add(0, overdueBadge);
         }
+
         titleLayout.getChildren().addAll(lblTitle, badges);
 
-        String eventLabel = event.equals("Không thuộc sự kiện") ? "🏢 Việc chung" : "📅 " + event;
-        Label lblEvent = format.formatLabel(eventLabel, FontWeight.BOLD, 12, event.equals("Không thuộc sự kiện") ? "#94a3b8" : "#7c4dff");
+        Label lblEvent = format.formatLabel(event, FontWeight.BOLD, 12, event.equals("Không") ? "#94a3b8" : "#7c4dff");
         lblEvent.setPrefWidth(150); lblEvent.setWrapText(true);
 
         Label lblDeadline = format.formatLabel(deadline, FontWeight.BOLD, 13, isOverdue ? "#ef4444" : "#475569");
@@ -159,23 +206,27 @@ public class work extends ScrollPane {
         bar.setPrefHeight(6);
         bar.setStyle("-fx-background-color: linear-gradient(to right, #448aff, #7c4dff); -fx-background-radius: 6px;");
         bar.maxWidthProperty().bind(track.widthProperty().multiply(progress));
+
         track.getChildren().add(bar);
         progressRow.getChildren().addAll(lblProgText, track);
 
         HBox actionBox = new HBox(8); actionBox.setAlignment(Pos.CENTER_LEFT); actionBox.setPrefWidth(80);
+
         Button btnView = format.formatCircleBtn("👁️‍🗨️", "#448aff", "#7c4dff");
         btnView.setOnAction(e -> {
             StackPane detailModal = createWorkProcessModal(title, event, deadline, status, progress);
             frame.getInstance().showCustomModal(detailModal);
         });
-        actionBox.getChildren().add(btnView);
 
+        actionBox.getChildren().add(btnView);
         row.getChildren().addAll(titleLayout, lblEvent, lblDeadline, lblPrio, progressRow, actionBox);
+
         return row;
     }
 
     private StackPane createWorkProcessModal(String workTitle, String eventName, String deadline, String status, double progress) {
         StackPane rootModalPane = new StackPane();
+
         VBox modalContent = new VBox(20);
         modalContent.setPrefWidth(900);
         modalContent.setMaxSize(900, Region.USE_PREF_SIZE);
@@ -185,14 +236,16 @@ public class work extends ScrollPane {
 
         HBox header = new HBox(16);
         header.setAlignment(Pos.CENTER_LEFT);
+
         VBox titleBox = new VBox(4);
         titleBox.getChildren().addAll(
                 format.formatLabel("Tiến độ: " + workTitle, FontWeight.BLACK, 24, "#1e293b"),
-                format.formatLabel("📅 " + eventName + "   |   ⏳ Hạn chót: " + deadline, FontWeight.BOLD, 13, "#64748b")
+                format.formatLabel("Sự kiện: " + eventName + "   |   Hạn chót: " + deadline, FontWeight.BOLD, 13, "#64748b")
         );
+
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button btnCreateTask = getShadowBtn("Tạo nhiệm vụ", "➕", "#10b981", "white", "rgba(16,185,129,0.4)");
+        Button btnCreateTask = getShadowBtn("Tạo nhiệm vụ", "#10b981", "white", "rgba(16,185,129,0.4)");
         btnCreateTask.setOnAction(e -> {
             VBox assignModal = createAssignTaskModal(rootModalPane, modalContent);
             rootModalPane.getChildren().setAll(assignModal);
@@ -217,15 +270,9 @@ public class work extends ScrollPane {
         bar.setPrefHeight(15);
         bar.setStyle("-fx-background-color: linear-gradient(to right, #448aff, #7c4dff); -fx-background-radius: 15px;");
         bar.maxWidthProperty().bind(track.widthProperty().multiply(progress));
+
         track.getChildren().add(bar);
-
-        Button btnGuide = getShadowBtn("Hướng dẫn tính", "💡", "rgba(245,158,11,0.15)", "#f59e0b", "rgba(0,0,0,0.05)");
-        btnGuide.setOnAction(e -> {
-            VBox guideModal = createGuideModal(rootModalPane, modalContent);
-            rootModalPane.getChildren().setAll(guideModal);
-        });
-
-        progressRow.getChildren().addAll(lblProgText, track, btnGuide);
+        progressRow.getChildren().addAll(lblProgText, track);
 
         VBox listContainer = format.formatBoxCard();
         listContainer.setPadding(new Insets(16, 8, 16, 16));
@@ -235,28 +282,26 @@ public class work extends ScrollPane {
         listHeader.setPadding(new Insets(12, 12, 12, 12));
         listHeader.setStyle("-fx-border-color: transparent transparent rgba(0,0,0,0.1) transparent; -fx-border-width: 1px;");
 
-        Label l1 = format.formatLabel("AVATAR", FontWeight.BLACK, 10, "#94a3b8"); l1.setPrefWidth(50);
-        Label l2 = format.formatLabel("THÀNH VIÊN", FontWeight.BLACK, 10, "#94a3b8"); l2.setPrefWidth(140);
-        Label l3 = format.formatLabel("NHIỆM VỤ", FontWeight.BLACK, 10, "#94a3b8"); l3.setPrefWidth(180);
-        Label l4 = format.formatLabel("ƯU TIÊN", FontWeight.BLACK, 10, "#94a3b8"); l4.setPrefWidth(80);
-        Label l5 = format.formatLabel("TÌNH TRẠNG", FontWeight.BLACK, 10, "#94a3b8"); l5.setPrefWidth(120);
-        Label l6 = format.formatLabel("SẢN PHẨM", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(100);
-        Label l7 = format.formatLabel("NGHIỆM THU", FontWeight.BLACK, 10, "#94a3b8"); l7.setPrefWidth(80);
+        Label l1 = format.formatLabel("THÀNH VIÊN", FontWeight.BLACK, 10, "#94a3b8"); l1.setPrefWidth(160);
+        Label l2 = format.formatLabel("NHIỆM VỤ", FontWeight.BLACK, 10, "#94a3b8"); l2.setPrefWidth(200);
+        Label l3 = format.formatLabel("ƯU TIÊN", FontWeight.BLACK, 10, "#94a3b8"); l3.setPrefWidth(100);
+        Label l4 = format.formatLabel("TÌNH TRẠNG", FontWeight.BLACK, 10, "#94a3b8"); l4.setPrefWidth(130);
+        Label l5 = format.formatLabel("SẢN PHẨM", FontWeight.BLACK, 10, "#94a3b8"); l5.setPrefWidth(120);
+        Label l6 = format.formatLabel("NGHIỆM THU", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(90);
 
-        listHeader.getChildren().addAll(l1, l2, l3, l4, l5, l6, l7);
+        listHeader.getChildren().addAll(l1, l2, l3, l4, l5, l6);
         listContainer.getChildren().add(listHeader);
 
         VBox rows = new VBox(4);
         rows.getChildren().addAll(
-                createTaskRow("trish.jpeg", "Trần Văn B", "Vẽ Background", "Cao", "Đã hoàn thành", "Link Drive", true),
-                createTaskRow("trish.jpeg", "Lê Thị C", "Vẽ Nhân vật", "Cao", "Chưa hoàn thành", "Đang cập nhật", false),
-                createTaskRow("trish.jpeg", "Nguyễn Hoàng D", "Lên typography", "Trung bình", "Chưa hoàn thành", "Đang cập nhật", false),
-                createTaskRow("trish.jpeg", "Phạm Văn E", "Xuất file in", "Thấp", "Đã hoàn thành", "Link Drive", true)
+                createTaskRow("Trần Văn B", "Vẽ Background", "Cao", "Hoàn thành", "https://youtube.com", true),
+                createTaskRow("Lê Thị C", "Vẽ Nhân vật", "Cao", "Chưa hoàn thành", "Chưa cập nhật", false),
+                createTaskRow("Nguyễn Hoàng D", "Lên typography", "Trung bình", "Chưa hoàn thành", "Chưa cập nhật", false),
+                createTaskRow("Phạm Văn E", "Xuất file in", "Thấp", "Hoàn thành", "https://youtube.com", true)
         );
 
         ScrollPane scrollList = new ScrollPane(rows);
-        scrollList.setMinHeight(250);
-        scrollList.setMaxHeight(250);
+        scrollList.setMinHeight(250); scrollList.setMaxHeight(250);
         format.formatScrollbar(scrollList, rows, 8);
         applySmoothScroll(scrollList, rows);
 
@@ -266,17 +311,18 @@ public class work extends ScrollPane {
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(16, 0, 0, 0));
 
-        Button btnClose = getShadowBtn("Đóng", "", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        Button btnClose = getModalActionBtn("Đóng", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
         btnClose.setOnAction(e -> frame.getInstance().closeOverlayModal());
+
         actions.getChildren().add(btnClose);
-
         modalContent.getChildren().addAll(header, progressRow, listContainer, actions);
-        rootModalPane.getChildren().add(modalContent);
 
+        rootModalPane.getChildren().add(modalContent);
         return rootModalPane;
     }
 
-    private VBox createGuideModal(StackPane rootModalPane, VBox previousView) {
+    private StackPane createGuideModal() {
+        StackPane rootModalPane = new StackPane();
         VBox box = new VBox(20);
         box.setPrefWidth(450);
         box.setMaxSize(450, Region.USE_PREF_SIZE);
@@ -292,14 +338,13 @@ public class work extends ScrollPane {
         ruleBox.setPadding(new Insets(16));
         ruleBox.setStyle("-fx-background-color: rgba(245,158,11,0.1); -fx-background-radius: 16px;");
         ruleBox.getChildren().addAll(
-                format.formatLabel("🔥 Ưu tiên Cao: 3 Điểm", FontWeight.BOLD, 13, "#ef4444"),
-                format.formatLabel("⚡ Ưu tiên Trung bình: 2 Điểm", FontWeight.BOLD, 13, "#f59e0b"),
-                format.formatLabel("🟢 Ưu tiên Thấp: 1 Điểm", FontWeight.BOLD, 13, "#10b981")
+                format.formatLabel("Ưu tiên Cao: 3 Điểm", FontWeight.BOLD, 13, "#ef4444"),
+                format.formatLabel("Ưu tiên Trung bình: 2 Điểm", FontWeight.BOLD, 13, "#f59e0b"),
+                format.formatLabel("Ưu tiên Thấp: 1 Điểm", FontWeight.BOLD, 13, "#10b981")
         );
 
         Label exTitle = format.formatLabel("Ví dụ thực tế (Theo dữ liệu mẫu):", FontWeight.BOLD, 13, "#1e293b");
         VBox exBox = new VBox(4);
-
         exBox.getChildren().addAll(
                 format.formatLabel("- Vẽ Background (Cao - Đã xong) -> Lấy 3 điểm", FontWeight.MEDIUM, 12, "#475569"),
                 format.formatLabel("- Vẽ Nhân vật (Cao - Chưa xong) -> 0 điểm", FontWeight.MEDIUM, 12, "#475569"),
@@ -315,43 +360,52 @@ public class work extends ScrollPane {
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(16, 0, 0, 0));
 
-        Button btnClose = getShadowBtn("Đã hiểu", "✓", "#10b981", "white", "rgba(16,185,129,0.4)");
-        btnClose.setOnAction(e -> rootModalPane.getChildren().setAll(previousView));
-        actions.getChildren().add(btnClose);
+        Button btnClose = getModalActionBtn("Đã hiểu", "#10b981", "white", "rgba(16,185,129,0.4)");
+        btnClose.setOnAction(e -> frame.getInstance().closeOverlayModal());
 
+        actions.getChildren().add(btnClose);
         box.getChildren().addAll(title, desc, ruleBox, exTitle, exBox, actions);
-        return box;
+        rootModalPane.getChildren().add(box);
+
+        return rootModalPane;
     }
 
-    private HBox createTaskRow(String avatarUrl, String memberName, String taskName, String priority, String status, String link, boolean isAccepted) {
+    private HBox createTaskRow(String memberName, String taskName, String priority, String status, String link, boolean isAccepted) {
         HBox row = new HBox(12);
         row.setPadding(new Insets(12));
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle("-fx-border-color: transparent transparent rgba(0,0,0,0.05) transparent; -fx-border-width: 1px;");
 
-        ImageView avatar = new ImageView(new Image(avatarUrl));
-        avatar.setFitWidth(36); avatar.setFitHeight(36); avatar.setClip(new Circle(18, 18, 18));
-        HBox avatarBox = new HBox(avatar); avatarBox.setPrefWidth(50);
-
-        Label lblName = format.formatLabel(memberName, FontWeight.BOLD, 13, "#1e293b"); lblName.setPrefWidth(140);
-        Label lblTask = format.formatLabel(taskName, FontWeight.BOLD, 13, "#475569"); lblTask.setPrefWidth(180);
+        Label lblName = format.formatLabel(memberName, FontWeight.BOLD, 13, "#1e293b"); lblName.setPrefWidth(160);
+        Label lblTask = format.formatLabel(taskName, FontWeight.BOLD, 13, "#475569"); lblTask.setPrefWidth(200);
 
         String prioBg = priority.equals("Cao") ? "rgba(239,68,68,0.15)" : priority.equals("Trung bình") ? "rgba(245,158,11,0.15)" : "rgba(16,185,129,0.15)";
         String prioText = priority.equals("Cao") ? "#ef4444" : priority.equals("Trung bình") ? "#f59e0b" : "#10b981";
-        HBox prioBox = new HBox(format.formatBadge(priority, prioBg, prioText)); prioBox.setAlignment(Pos.CENTER_LEFT); prioBox.setPrefWidth(80);
+        HBox prioBox = new HBox(format.formatBadge(priority, prioBg, prioText)); prioBox.setAlignment(Pos.CENTER_LEFT); prioBox.setPrefWidth(100);
 
-        String stBg = status.equals("Đã hoàn thành") ? "rgba(16,185,129,0.15)" : "rgba(100,116,139,0.15)";
-        String stText = status.equals("Đã hoàn thành") ? "#10b981" : "#64748b";
-        HBox statusBox = new HBox(format.formatBadge(status, stBg, stText)); statusBox.setAlignment(Pos.CENTER_LEFT); statusBox.setPrefWidth(120);
+        String stBg = status.equals("Hoàn thành") ? "rgba(16,185,129,0.15)" : "rgba(100,116,139,0.15)";
+        String stText = status.equals("Hoàn thành") ? "#10b981" : "#64748b";
+        HBox statusBox = new HBox(format.formatBadge(status, stBg, stText)); statusBox.setAlignment(Pos.CENTER_LEFT); statusBox.setPrefWidth(130);
 
-        Label lblLink = format.formatLabel(link, FontWeight.MEDIUM, 12, link.equals("Đang cập nhật") ? "#94a3b8" : "#3b82f6");
-        if(!link.equals("Đang cập nhật")) lblLink.setUnderline(true);
-        lblLink.setPrefWidth(100);
+        HBox linkBox = new HBox();
+        linkBox.setPrefWidth(120);
+        linkBox.setAlignment(Pos.CENTER_LEFT);
+        if (!link.equals("Chưa cập nhật")) {
+            Hyperlink hl = new Hyperlink(link);
+            hl.setStyle("-fx-text-fill: #3b82f6; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 0; -fx-border-width: 0;");
+            hl.setOnAction(e -> {
+                try { java.awt.Desktop.getDesktop().browse(new java.net.URI(link)); } catch (Exception ex) { ex.printStackTrace(); }
+            });
+            linkBox.getChildren().add(hl);
+        } else {
+            Label lblLink = format.formatLabel(link, FontWeight.MEDIUM, 12, "#94a3b8");
+            linkBox.getChildren().add(lblLink);
+        }
 
         CheckBox chkAccept = format.formatCheckBox(""); chkAccept.setSelected(isAccepted);
-        HBox chkBox = new HBox(chkAccept); chkBox.setAlignment(Pos.CENTER_LEFT); chkBox.setPrefWidth(80);
+        HBox chkBox = new HBox(chkAccept); chkBox.setAlignment(Pos.CENTER_LEFT); chkBox.setPrefWidth(90);
 
-        row.getChildren().addAll(avatarBox, lblName, lblTask, prioBox, statusBox, lblLink, chkBox);
+        row.getChildren().addAll(lblName, lblTask, prioBox, statusBox, linkBox, chkBox);
         return row;
     }
 
@@ -372,11 +426,12 @@ public class work extends ScrollPane {
 
         ComboBox<String> cbPriority = format.formatSortBtn("Mức độ ưu tiên", "Thấp", "Trung bình", "Cao");
         cbPriority.setValue("Trung bình"); cbPriority.setPrefWidth(Double.MAX_VALUE);
+        fixHover(cbPriority);
         VBox prioGroup = new VBox(6, format.formatLabel("Độ quan trọng", FontWeight.BOLD, 12, "#94a3b8"), cbPriority);
 
-        ComboBox<String> cbMember = format.formatSortBtn("Chọn thành viên để giao việc", "Trần Văn B", "Lê Thị C", "Nguyễn Hoàng D", "Phạm Văn E");
+        ComboBox<String> cbMember = format.formatSortBtn("Chọn thành viên phụ trách", "Trần Văn B", "Lê Thị C", "Nguyễn Hoàng D", "Phạm Văn E");
         cbMember.setPrefWidth(Double.MAX_VALUE);
-        cbMember.setStyle("-fx-background-color: rgba(59,130,246,0.15); -fx-background-radius: 20px; -fx-padding: 4 12; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-text-fill: #3b82f6; -fx-cursor: hand;");
+        fixHover(cbMember);
         VBox memberGroup = new VBox(6, format.formatLabel("Thành viên phụ trách *", FontWeight.BOLD, 12, "#94a3b8"), cbMember);
 
         fields.getChildren().addAll(nameGroup, prioGroup, memberGroup);
@@ -385,10 +440,10 @@ public class work extends ScrollPane {
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(8, 0, 0, 0));
 
-        Button btnCancel = getShadowBtn("Quay lại", "", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        Button btnCancel = getModalActionBtn("Quay lại", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
         btnCancel.setOnAction(e -> rootModalPane.getChildren().setAll(previousView));
 
-        Button btnConfirm = getShadowBtn("Giao việc", "✓", "#10b981", "white", "rgba(16,185,129,0.4)");
+        Button btnConfirm = getModalActionBtn("Giao việc", "#10b981", "white", "rgba(16,185,129,0.4)");
         btnConfirm.setOnAction(e -> {
             if (fTaskName.getText().trim().isEmpty() || cbMember.getValue() == null) {
                 frame.getInstance().triggerToast("❌ Vui lòng nhập tên nhiệm vụ và chọn người thực hiện!");
@@ -404,21 +459,25 @@ public class work extends ScrollPane {
         return box;
     }
 
-    private Button getShadowBtn(String text, String icon, String bgColor, String textColor, String shadowColor) {
-        Button btn = new Button();
-        HBox content = new HBox(8);
-        content.setAlignment(Pos.CENTER);
-        if (!icon.isEmpty()) {
-            Label lblIcon = new Label(icon); lblIcon.setTextFill(Color.web(textColor));
-            content.getChildren().add(lblIcon);
-        }
-        Label lblText = new Label(text);
-        lblText.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
-        lblText.setTextFill(Color.web(textColor));
-        content.getChildren().add(lblText);
-        btn.setGraphic(content);
-        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 8 16 8 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
+    private Button getShadowBtn(String text, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button(text);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(textColor));
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 8 20 8 20; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
         btn.setOnMouseEntered(e -> { btn.setScaleX(1.05); btn.setScaleY(1.05); });
+        btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
+        return btn;
+    }
+
+    private Button getModalActionBtn(String text, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button(text);
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setPrefHeight(45);
+        HBox.setHgrow(btn, Priority.ALWAYS);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(textColor));
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 20px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
+        btn.setOnMouseEntered(e -> { btn.setScaleX(1.02); btn.setScaleY(1.02); });
         btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
         return btn;
     }

@@ -23,23 +23,52 @@ public class setting extends ScrollPane {
     private String userRole = "Hội trưởng";
     private String userDept = "Chưa phân công";
 
+    private VBox topCardsCol1;
+    private VBox topCardsCol2;
+
     public setting() {
         VBox mainContent = new VBox(24);
         mainContent.setPadding(new Insets(32));
         mainContent.setStyle("-fx-background-color: transparent;");
 
         HBox topCards = new HBox(24);
-        VBox col1 = new VBox(24); HBox.setHgrow(col1, Priority.ALWAYS); col1.setPrefWidth(600);
-        VBox col2 = new VBox(24); HBox.setHgrow(col2, Priority.ALWAYS); col2.setPrefWidth(600);
+        topCardsCol1 = new VBox(24); HBox.setHgrow(topCardsCol1, Priority.ALWAYS); topCardsCol1.setPrefWidth(600);
+        topCardsCol2 = new VBox(24); HBox.setHgrow(topCardsCol2, Priority.ALWAYS); topCardsCol2.setPrefWidth(600);
 
-        col1.getChildren().addAll(buildProfileCard(), buildActivityCard());
-        col2.getChildren().addAll(buildSecurityCard(), buildAdvancedCard());
+        refreshUI();
 
-        topCards.getChildren().addAll(col1, col2);
-
+        topCards.getChildren().addAll(topCardsCol1, topCardsCol2);
         mainContent.getChildren().add(topCards);
+
         format.formatScrollbar(this, mainContent, 12);
         this.setContent(mainContent);
+    }
+
+    private void refreshUI() {
+        topCardsCol1.getChildren().clear();
+        topCardsCol2.getChildren().clear();
+
+        topCardsCol1.getChildren().addAll(buildProfileCard(), buildActivityCard());
+        topCardsCol2.getChildren().addAll(buildSecurityCard(), buildAdvancedCard());
+    }
+
+    private void fixHover(Node node) {
+        node.setOnMouseEntered(e -> node.setOpacity(0.7));
+        node.setOnMouseExited(e -> {
+            node.setOpacity(1.0);
+            node.setScaleX(1.0);
+            node.setScaleY(1.0);
+        });
+        if (node instanceof ComboBox) {
+            ((ComboBox<?>) node).setOnShowing(e -> {
+                node.setOpacity(1.0);
+                node.setScaleX(1.0);
+                node.setScaleY(1.0);
+            });
+            ((ComboBox<?>) node).setOnHidden(e -> {
+                node.setOpacity(1.0);
+            });
+        }
     }
 
     private VBox buildProfileCard() {
@@ -53,8 +82,17 @@ public class setting extends ScrollPane {
         ImageView avt = new ImageView(new Image("temp.png"));
         avt.setFitWidth(100); avt.setFitHeight(100);
         avt.setClip(new Circle(50, 50, 50));
-        Button btnChangeAvt = getShadowBtn("Đổi ảnh", "", "rgba(100,116,139,0.1)", "#475569", "rgba(0,0,0,0.05)");
+
+        Button btnChangeAvt = new Button("Đổi ảnh");
+        btnChangeAvt.setPrefWidth(100);
+        btnChangeAvt.setPrefHeight(35);
+        btnChangeAvt.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
+        btnChangeAvt.setTextFill(Color.web("#475569"));
+        btnChangeAvt.setStyle("-fx-background-color: rgba(100,116,139,0.1); -fx-background-radius: 20px; -fx-cursor: hand;");
+        btnChangeAvt.setOnMouseEntered(e -> btnChangeAvt.setStyle("-fx-background-color: rgba(100,116,139,0.2); -fx-background-radius: 20px; -fx-cursor: hand;"));
+        btnChangeAvt.setOnMouseExited(e -> btnChangeAvt.setStyle("-fx-background-color: rgba(100,116,139,0.1); -fx-background-radius: 20px; -fx-cursor: hand;"));
         btnChangeAvt.setOnAction(e -> frame.getInstance().triggerToast("Đã mở chọn ảnh"));
+
         leftBox.getChildren().addAll(avt, btnChangeAvt);
 
         VBox rightBox = new VBox(12);
@@ -72,15 +110,13 @@ public class setting extends ScrollPane {
         TextField fPhone = format.formatTextField("0901234567");
         rightBox.getChildren().add(new VBox(4, format.formatLabel("Số điện thoại", FontWeight.BOLD, 12, "#94a3b8"), fPhone));
 
-        HBox actions = new HBox();
-        actions.setAlignment(Pos.CENTER_RIGHT);
-        Button btnSave = getShadowBtn("Lưu", "", "#5020d8", "white", "rgba(80,32,216,0.4)");
+        Button btnSave = getModalActionBtn("Lưu", "#5020d8", "white", "rgba(80,32,216,0.4)");
         btnSave.setOnAction(e -> frame.getInstance().triggerToast("Đã lưu thông tin"));
-        actions.getChildren().add(btnSave);
-        rightBox.getChildren().add(actions);
 
+        rightBox.getChildren().add(btnSave);
         content.getChildren().addAll(leftBox, rightBox);
         card.getChildren().add(content);
+
         return card;
     }
 
@@ -93,9 +129,10 @@ public class setting extends ScrollPane {
 
         grid.add(new VBox(4, format.formatLabel("Ngày tham gia", FontWeight.BOLD, 12, "#94a3b8"), format.formatLabel("01/01/2023", FontWeight.BLACK, 16, "#1e293b")), 0, 0);
         grid.add(new VBox(4, format.formatLabel("Trạng thái", FontWeight.BOLD, 12, "#94a3b8"), format.formatBadge("Hoạt động", "rgba(16,185,129,0.15)", "#10b981")), 1, 0);
-
         grid.add(new VBox(4, format.formatLabel("Bộ phận", FontWeight.BOLD, 12, "#94a3b8"), format.formatLabel(userDept, FontWeight.BLACK, 16, "#7c4dff")), 0, 1);
-        grid.add(new VBox(4, format.formatLabel("Chức vụ", FontWeight.BOLD, 12, "#94a3b8"), format.formatLabel(userRole, FontWeight.BLACK, 16, "#f59e0b")), 1, 1);
+
+        String roleColor = userRole.equals("Hội trưởng") ? "#f59e0b" : userRole.equals("Trưởng ban") ? "#10b981" : "#475569";
+        grid.add(new VBox(4, format.formatLabel("Chức vụ", FontWeight.BOLD, 12, "#94a3b8"), format.formatLabel(userRole, FontWeight.BLACK, 16, roleColor)), 1, 1);
 
         card.getChildren().add(grid);
         return card;
@@ -116,14 +153,12 @@ public class setting extends ScrollPane {
         PasswordField fConfirm = new PasswordField(); formatField(fConfirm, "Nhập lại mật khẩu mới...");
         form.getChildren().add(new VBox(4, format.formatLabel("Xác nhận mật khẩu", FontWeight.BOLD, 12, "#94a3b8"), fConfirm));
 
-        HBox actions = new HBox();
-        actions.setAlignment(Pos.CENTER_RIGHT);
-        Button btnSave = getShadowBtn("Đổi mật khẩu", "", "#10b981", "white", "rgba(16,185,129,0.4)");
+        Button btnSave = getModalActionBtn("Đổi mật khẩu", "#10b981", "white", "rgba(16,185,129,0.4)");
         btnSave.setOnAction(e -> frame.getInstance().triggerToast("Đã đổi mật khẩu"));
-        actions.getChildren().add(btnSave);
-        form.getChildren().add(actions);
 
+        form.getChildren().add(btnSave);
         card.getChildren().add(form);
+
         return card;
     }
 
@@ -156,13 +191,20 @@ public class setting extends ScrollPane {
     private HBox createActionRow(String title, String desc, String btnText, String btnBg, String btnColor, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
         HBox row = new HBox(16);
         row.setAlignment(Pos.CENTER_LEFT);
-
         VBox info = new VBox(4,
                 format.formatLabel(title, FontWeight.BOLD, 14, "#1e293b"),
                 format.formatLabel(desc, FontWeight.MEDIUM, 12, "#64748b")
         );
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button btn = getShadowBtn(btnText, "", btnBg, btnColor, "rgba(0,0,0,0.05)");
+
+        Button btn = new Button(btnText);
+        btn.setPrefWidth(140);
+        btn.setPrefHeight(40);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(btnColor));
+        btn.setStyle("-fx-background-color: " + btnBg + "; -fx-background-radius: 20px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);");
+        btn.setOnMouseEntered(e -> { btn.setScaleX(1.03); btn.setScaleY(1.03); });
+        btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
         btn.setOnAction(action);
 
         row.getChildren().addAll(info, spacer, btn);
@@ -172,109 +214,149 @@ public class setting extends ScrollPane {
     private void showTransferModal() {
         StackPane rootModal = new StackPane();
         VBox box = new VBox(20);
-        box.setPrefWidth(400); box.setMaxSize(400, Region.USE_PREF_SIZE);
+        box.setPrefWidth(450); box.setMaxSize(450, Region.USE_PREF_SIZE);
         box.setPadding(new Insets(32));
         box.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
         box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
-        box.getChildren().addAll(
-                format.formatLabel("Chuyển giao", FontWeight.BLACK, 20, "#1e293b"),
-                format.formatLabel("Bàn giao cho nhân sự đang hoạt động.", FontWeight.MEDIUM, 12, "#64748b")
-        );
+        Label title = format.formatLabel("Chuyển giao quyền", FontWeight.BLACK, 20, "#1e293b");
+        Label desc = format.formatLabel("Chỉ có thể chuyển giao cho thành viên thường, để tránh chồng chất nhiệm vụ. Nếu muốn chọn một trưởng ban, cần cho trưởng ban đó được ra khỏi ban.", FontWeight.MEDIUM, 13, "#64748b");
+        desc.setWrapText(true);
 
-        ComboBox<String> cbSuccessor = new ComboBox<>();
-        cbSuccessor.setPromptText("Chọn người tiếp nhận");
-        cbSuccessor.setPrefWidth(Double.MAX_VALUE);
-        cbSuccessor.setStyle("-fx-background-color: rgba(59,130,246,0.15); -fx-background-radius: 20px; -fx-padding: 8 16; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-text-fill: #3b82f6; -fx-cursor: hand; -fx-border-color: rgba(59,130,246,0.3); -fx-border-radius: 20px;");
-
-        cbSuccessor.getItems().addAll(
-                "Hoàng Kim Yến",
-                "Nguyễn Văn A",
-                "Lê Thị B"
-        );
-
-        box.getChildren().add(new VBox(6, format.formatLabel("Người tiếp nhận", FontWeight.BOLD, 12, "#94a3b8"), cbSuccessor));
+        ComboBox<String> cbSuccessor = format.formatSortBtn("Chọn người tiếp nhận", "Hoàng Kim Yến", "Nguyễn Văn A", "Lê Thị B");
+        cbSuccessor.setMaxWidth(Double.MAX_VALUE);
+        fixHover(cbSuccessor);
 
         HBox actions = new HBox(12);
-        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(16, 0, 0, 0));
 
-        Button btnCancel = getShadowBtn("Hủy", "", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
         btnCancel.setOnAction(e -> frame.getInstance().closeOverlayModal());
 
-        Button btnConfirm = getShadowBtn("Xác nhận", "", "#3b82f6", "white", "rgba(59,130,246,0.4)");
+        Button btnConfirm = getModalActionBtn("Xác nhận", "#3b82f6", "white", "rgba(59,130,246,0.4)");
         btnConfirm.setOnAction(e -> {
-            if (cbSuccessor.getValue() == null) {
+            if (cbSuccessor.getValue() == null || cbSuccessor.getValue().equals("Chọn người tiếp nhận")) {
                 frame.getInstance().triggerToast("Vui lòng chọn người tiếp nhận.");
                 return;
             }
             frame.getInstance().closeOverlayModal();
-            frame.getInstance().triggerToast("Đã chuyển giao. Đang đăng xuất...");
-
-            PauseTransition pause = new PauseTransition(Duration.seconds(3));
-            pause.setOnFinished(event -> System.exit(0));
-            pause.play();
+            frame.getInstance().triggerToast("Đã chuyển giao. Bạn đã trở thành thành viên thường.");
+            userRole = "Thành viên";
+            refreshUI();
         });
 
         actions.getChildren().addAll(btnCancel, btnConfirm);
-        box.getChildren().add(actions);
-
+        box.getChildren().addAll(title, desc, new VBox(6, format.formatLabel("Người tiếp nhận", FontWeight.BOLD, 12, "#94a3b8"), cbSuccessor), actions);
         rootModal.getChildren().add(box);
         frame.getInstance().showCustomModal(rootModal);
     }
 
     private void showLeaveModal() {
-        VBox modal = format.formatSimpleModal(
-                "Xác nhận rời CLB",
-                "Bạn muốn rời khỏi câu lạc bộ?",
-                "Hủy", "Xác nhận",
-                e -> frame.getInstance().closeOverlayModal(),
-                e -> {
-                    frame.getInstance().closeOverlayModal();
-                    frame.getInstance().triggerToast("Tạm biệt!");
-                    PauseTransition pause = new PauseTransition(Duration.seconds(2));
-                    pause.setOnFinished(event -> System.exit(0));
-                    pause.play();
-                }
-        );
-        frame.getInstance().showCustomModal(modal);
+        if (userRole.equals("Hội trưởng")) {
+            StackPane rootModal = new StackPane();
+            VBox box = new VBox(20);
+            box.setPrefWidth(420); box.setMaxSize(420, Region.USE_PREF_SIZE);
+            box.setPadding(new Insets(32));
+            box.setStyle("-fx-background-color: white; -fx-background-radius: 40px;");
+            box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+            Label title = format.formatLabel("Không thể rời CLB", FontWeight.BLACK, 20, "#ef4444");
+            Label desc = format.formatLabel("Bạn chưa chuyển giao vai trò Hội trưởng. Vui lòng chuyển giao quyền lực và trở thành thành viên thường trước khi rời câu lạc bộ.", FontWeight.MEDIUM, 13, "#64748b");
+            desc.setWrapText(true);
+
+            HBox actions = new HBox(12);
+            actions.setAlignment(Pos.CENTER);
+            actions.setPadding(new Insets(16, 0, 0, 0));
+
+            Button btnClose = getModalActionBtn("Đã hiểu", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+            btnClose.setOnAction(e -> frame.getInstance().closeOverlayModal());
+            actions.getChildren().add(btnClose);
+
+            box.getChildren().addAll(title, desc, actions);
+            rootModal.getChildren().add(box);
+            frame.getInstance().showCustomModal(rootModal);
+        } else {
+            StackPane rootModal = new StackPane();
+            VBox box = new VBox(20);
+            box.setPrefWidth(400); box.setMaxSize(400, Region.USE_PREF_SIZE);
+            box.setPadding(new Insets(32));
+            box.setStyle("-fx-background-color: white; -fx-background-radius: 40px;");
+            box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+            Label title = format.formatLabel("Xác nhận rời CLB", FontWeight.BLACK, 20, "#ef4444");
+            Label desc = format.formatLabel("Bạn có chắc chắn muốn rời khỏi câu lạc bộ không? Bạn sẽ không thể hoàn tác hành động này.", FontWeight.MEDIUM, 13, "#64748b");
+            desc.setWrapText(true);
+
+            HBox actions = new HBox(12);
+            actions.setAlignment(Pos.CENTER);
+            actions.setPadding(new Insets(16, 0, 0, 0));
+
+            Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+            btnCancel.setOnAction(e -> frame.getInstance().closeOverlayModal());
+            Button btnConfirm = getModalActionBtn("Xác nhận", "#ef4444", "white", "rgba(239,68,68,0.4)");
+            btnConfirm.setOnAction(e -> {
+                frame.getInstance().closeOverlayModal();
+                frame.getInstance().triggerToast("Tạm biệt!");
+                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                pause.setOnFinished(event -> System.exit(0));
+                pause.play();
+            });
+            actions.getChildren().addAll(btnCancel, btnConfirm);
+
+            box.getChildren().addAll(title, desc, actions);
+            rootModal.getChildren().add(box);
+            frame.getInstance().showCustomModal(rootModal);
+        }
     }
 
     private void showResignModal() {
-        VBox modal = format.formatSimpleModal(
-                "Xác nhận từ chức",
-                "Bạn sẽ trở thành thành viên thường.",
-                "Hủy", "Từ chức",
-                e -> frame.getInstance().closeOverlayModal(),
-                e -> {
-                    frame.getInstance().closeOverlayModal();
-                    frame.getInstance().triggerToast("Đã cập nhật chức vụ.");
-                }
-        );
-        frame.getInstance().showCustomModal(modal);
+        StackPane rootModal = new StackPane();
+        VBox box = new VBox(20);
+        box.setPrefWidth(420); box.setMaxSize(420, Region.USE_PREF_SIZE);
+        box.setPadding(new Insets(32));
+        box.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
+        box.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+        Label title = format.formatLabel("Xác nhận từ chức", FontWeight.BLACK, 20, "#f59e0b");
+        Label desc = format.formatLabel("Bạn sẽ thôi giữ vị trí quản lý hiện tại và trở thành thành viên thường.", FontWeight.MEDIUM, 13, "#64748b");
+        desc.setWrapText(true);
+
+        HBox actions = new HBox(12);
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(16, 0, 0, 0));
+
+        Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        btnCancel.setOnAction(e -> frame.getInstance().closeOverlayModal());
+
+        Button btnConfirm = getModalActionBtn("Từ chức", "#f59e0b", "white", "rgba(245,158,11,0.4)");
+        btnConfirm.setOnAction(e -> {
+            frame.getInstance().closeOverlayModal();
+            frame.getInstance().triggerToast("Đã cập nhật chức vụ.");
+            userRole = "Thành viên";
+            refreshUI();
+        });
+
+        actions.getChildren().addAll(btnCancel, btnConfirm);
+        box.getChildren().addAll(title, desc, actions);
+        rootModal.getChildren().add(box);
+        frame.getInstance().showCustomModal(rootModal);
     }
 
     private void formatField(PasswordField tf, String prompt) {
         tf.setPromptText(prompt);
-        tf.setStyle("-fx-background-color: rgb(208 197 244 / 0.5); -fx-background-radius: 40px; -fx-padding: 10 16; -fx-font-family: 'Google Sans'; -fx-text-inner-color: #000000;");
+        tf.setStyle("-fx-background-color: rgb(208 197 244 / 0.5); -fx-background-radius: 40px; -fx-padding: 12 16; -fx-font-family: 'Google Sans'; -fx-text-inner-color: #000000; -fx-prompt-text-fill: #64748b; -fx-border-width: 0px;");
     }
 
-    private Button getShadowBtn(String text, String icon, String bgColor, String textColor, String shadowColor) {
-        Button btn = new Button();
-        HBox content = new HBox(8);
-        content.setAlignment(Pos.CENTER);
-        if (!icon.isEmpty()) {
-            Label lblIcon = new Label(icon); lblIcon.setTextFill(Color.web(textColor));
-            content.getChildren().add(lblIcon);
-        }
-        Label lblText = new Label(text);
-        lblText.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
-        lblText.setTextFill(Color.web(textColor));
-        content.getChildren().add(lblText);
-
-        btn.setGraphic(content);
-        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 8 16 8 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
-
-        btn.setOnMouseEntered(e -> { btn.setScaleX(1.05); btn.setScaleY(1.05); });
+    private Button getModalActionBtn(String text, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button(text);
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setPrefHeight(45);
+        HBox.setHgrow(btn, Priority.ALWAYS);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(textColor));
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 20px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
+        btn.setOnMouseEntered(e -> { btn.setScaleX(1.02); btn.setScaleY(1.02); });
         btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
         return btn;
     }

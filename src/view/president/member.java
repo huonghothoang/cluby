@@ -27,13 +27,13 @@ public class member extends ScrollPane {
         mainContent.setMaxWidth(1000);
 
         HBox kpiRow = new HBox(16);
-        kpiRow.getChildren().addAll(
-                format.formatKPICard("Tổng số", "120", "#64748b", "#1e293b"),
-                format.formatKPICard("Hoạt động", "100", "#10b981", "#1e293b"),
-                format.formatKPICard("Tạm nghỉ", "15", "#f59e0b", "#1e293b"),
-                format.formatKPICard("Đã rời", "5", "#64748b", "#1e293b")
-        );
-        for(Node node : kpiRow.getChildren()) { HBox.setHgrow(node, Priority.ALWAYS); }
+        VBox card1 = createStatCard("Tổng số", "120", "#475569", "#1e293b", "#a5b4fc", "👤");
+        VBox card2 = createStatCard("Hoạt động", "100", "#475569", "#1e293b", "#6ee7b7", "✔");
+        VBox card3 = createStatCard("Tạm nghỉ", "15", "#475569", "#1e293b", "#fde68a", "⏸");
+        VBox card4 = createStatCard("Đã rời", "5", "#475569", "#1e293b", "#cbd5e1", "✖");
+        HBox.setHgrow(card1, Priority.ALWAYS); HBox.setHgrow(card2, Priority.ALWAYS);
+        HBox.setHgrow(card3, Priority.ALWAYS); HBox.setHgrow(card4, Priority.ALWAYS);
+        kpiRow.getChildren().addAll(card1, card2, card3, card4);
 
         HBox filterBar = new HBox(16);
         filterBar.setAlignment(Pos.CENTER_LEFT);
@@ -47,12 +47,14 @@ public class member extends ScrollPane {
         searchBox.getChildren().addAll(searchField, btnSearch);
 
         ComboBox<String> cbBan = format.formatSortBtn("Bộ phận", "Tất cả", "Nội dung", "Kỹ thuật", "Truyền thông", "Hậu cần", "Chưa phân ban");
-        ComboBox<String> cbRole = format.formatSortBtn("Chức vụ", "Tất cả", "Quản lý", "Trưởng nhóm", "Thành viên");
+        ComboBox<String> cbRole = format.formatSortBtn("Chức vụ", "Tất cả", "Hội trưởng", "Trưởng ban", "Thành viên");
         ComboBox<String> cbStatus = format.formatSortBtn("Trạng thái", "Tất cả", "Hoạt động", "Tạm nghỉ", "Đã rời");
+
+        fixHover(cbBan); fixHover(cbRole); fixHover(cbStatus);
 
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button btnAdd = format.formatBtn("Thêm thành viên", "➕");
+        Button btnAdd = getShadowBtn("Thêm thành viên", "", "#5020d8", "white", "rgba(80,32,216,0.4)");
         btnAdd.setOnAction(e -> {
             VBox addModal = createAddMemberModal();
             frame.getInstance().showCustomModal(addModal);
@@ -64,22 +66,36 @@ public class member extends ScrollPane {
         tableContainer.getChildren().add(createMemberTableHeader());
 
         EventHandler<ActionEvent> markAsLeftAction = e -> {
-            VBox confirmBox = format.formatSimpleModal(
-                    "Xác nhận", "Chuyển trạng thái thành viên này sang 'Đã rời'?", "Hủy", "Xác nhận",
-                    ev -> frame.getInstance().closeOverlayModal(),
-                    ev -> {
-                        frame.getInstance().closeOverlayModal();
-                        frame.getInstance().triggerToast("Đã cập nhật trạng thái");
-                    });
-
+            StackPane rootModalPane = new StackPane();
+            VBox confirmBox = new VBox(20);
             confirmBox.setMaxSize(400, Region.USE_PREF_SIZE);
-            frame.getInstance().showCustomModal(confirmBox);
+            confirmBox.setPadding(new Insets(32));
+            confirmBox.setStyle("-fx-background-color: white; -fx-background-radius: 40px;");
+            confirmBox.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
+
+            Label title = format.formatLabel("Xác nhận", FontWeight.BLACK, 20, "#1e293b");
+            Label sub = format.formatLabel("Chuyển trạng thái thành viên này sang 'Đã rời'?", FontWeight.MEDIUM, 13, "#64748b");
+            sub.setWrapText(true);
+
+            HBox actions = new HBox(12);
+            actions.setAlignment(Pos.CENTER);
+            Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+            btnCancel.setOnAction(ev -> frame.getInstance().closeOverlayModal());
+            Button btnConfirm = getModalActionBtn("Xác nhận", "#5020d8", "white", "rgba(80,32,216,0.4)");
+            btnConfirm.setOnAction(ev -> {
+                frame.getInstance().closeOverlayModal();
+                frame.getInstance().triggerToast("Đã cập nhật trạng thái");
+            });
+            actions.getChildren().addAll(btnCancel, btnConfirm);
+            confirmBox.getChildren().addAll(title, sub, actions);
+            rootModalPane.getChildren().add(confirmBox);
+            frame.getInstance().showCustomModal(rootModalPane);
         };
 
         VBox rows = new VBox(4);
         rows.getChildren().addAll(
-                createMemberRow("temp.png", "Nguyễn Minh Quân", "24KT001", "quan.nm@gmail.com", "0901234567", "Chưa phân ban", "Quản lý", "01/01/2024", "Hoạt động", "Chịu trách nhiệm điều hành chung.", 0, 15, 15, 0, markAsLeftAction),
-                createMemberRow("temp.png", "Trần Thu Hà", "24ND015", "ha.tt@gmail.com", "0912345678", "Nội dung", "Trưởng nhóm", "15/03/2024", "Hoạt động", "", 2, 10, 12, 0, markAsLeftAction),
+                createMemberRow("temp.png", "Nguyễn Minh Quân", "24KT001", "quan.nm@gmail.com", "0901234567", "Chưa phân ban", "Hội trưởng", "01/01/2024", "Hoạt động", "Chịu trách nhiệm điều hành chung.", 0, 15, 15, 0, markAsLeftAction),
+                createMemberRow("temp.png", "Trần Thu Hà", "24ND015", "ha.tt@gmail.com", "0912345678", "Nội dung", "Trưởng ban", "15/03/2024", "Hoạt động", "", 2, 10, 12, 0, markAsLeftAction),
                 createMemberRow("temp.png", "Lê Đức Anh", "25KT022", "anh.ld@gmail.com", "0923456789", "Kỹ thuật", "Thành viên", "10/10/2025", "Tạm nghỉ", "Nghỉ cá nhân.", 0, 4, 4, 0, markAsLeftAction)
         );
 
@@ -87,8 +103,8 @@ public class member extends ScrollPane {
         scrollList.setPrefHeight(450);
         format.formatScrollbar(scrollList, rows, 8);
         applySmoothScroll(scrollList, rows);
-
         tableContainer.getChildren().add(scrollList);
+
         mainContent.getChildren().addAll(kpiRow, filterBar, tableContainer);
         format.formatScrollbar(this, mainContent, 12);
         this.setContent(mainContent);
@@ -107,18 +123,52 @@ public class member extends ScrollPane {
         });
     }
 
+    private void fixHover(Node node) {
+        node.setOnMouseEntered(e -> node.setOpacity(0.7));
+        node.setOnMouseExited(e -> {
+            node.setOpacity(1.0);
+            node.setScaleX(1.0);
+            node.setScaleY(1.0);
+        });
+        if (node instanceof ComboBox) {
+            ((ComboBox<?>) node).setOnShowing(e -> {
+                node.setOpacity(1.0);
+                node.setScaleX(1.0);
+                node.setScaleY(1.0);
+            });
+            ((ComboBox<?>) node).setOnHidden(e -> {
+                node.setOpacity(1.0);
+            });
+        }
+    }
+
+    private VBox createStatCard(String title, String value, String titleColor, String valColor, String iconBg, String iconEmoji) {
+        VBox box = format.formatBoxCard();
+        box.setPadding(new Insets(20));
+        box.setMinHeight(Region.USE_PREF_SIZE);
+        HBox content = new HBox();
+        content.setAlignment(Pos.CENTER_LEFT);
+        VBox textCol = new VBox(4);
+        textCol.getChildren().addAll(format.formatLabel(title, FontWeight.BOLD, 12, titleColor), format.formatLabel(value, FontWeight.BLACK, 28, valColor));
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        StackPane iconContainer = new StackPane();
+        iconContainer.getChildren().addAll(new Circle(24, Color.web(iconBg)), format.formatLabel(iconEmoji, FontWeight.NORMAL, 20, "#000000"));
+        content.getChildren().addAll(textCol, spacer, iconContainer);
+        box.getChildren().add(content);
+        return box;
+    }
+
     private HBox createMemberTableHeader() {
         HBox header = new HBox(16);
         header.setPadding(new Insets(12, 16, 12, 16));
         header.setStyle("-fx-border-color: transparent transparent rgba(255,255,255,0.4) transparent; -fx-border-width: 1px;");
-
         Label l1 = format.formatLabel("LOGO", FontWeight.BLACK, 10, "#94a3b8"); l1.setPrefWidth(60);
         Label l2 = format.formatLabel("THÀNH VIÊN", FontWeight.BLACK, 10, "#94a3b8"); l2.setPrefWidth(220);
         Label l3 = format.formatLabel("BỘ PHẬN", FontWeight.BLACK, 10, "#94a3b8"); l3.setPrefWidth(140);
         Label l4 = format.formatLabel("CHỨC VỤ", FontWeight.BLACK, 10, "#94a3b8"); l4.setPrefWidth(120);
         Label l5 = format.formatLabel("TRẠNG THÁI", FontWeight.BLACK, 10, "#94a3b8"); l5.setPrefWidth(120);
         Label l6 = format.formatLabel("HÀNH ĐỘNG", FontWeight.BLACK, 10, "#94a3b8"); l6.setPrefWidth(100);
-
         header.getChildren().addAll(l1, l2, l3, l4, l5, l6);
         return header;
     }
@@ -142,7 +192,6 @@ public class member extends ScrollPane {
         HBox statusBox = new HBox(createDynamicBadge(status, false)); statusBox.setAlignment(Pos.CENTER_LEFT); statusBox.setPrefWidth(120);
 
         HBox actionBox = new HBox(8); actionBox.setAlignment(Pos.CENTER_LEFT); actionBox.setPrefWidth(100);
-
         Button btnView = format.formatCircleBtn("👁️‍🗨️", "#448aff", "#7c4dff");
         btnView.setOnAction(e -> {
             VBox modal = createMemberProfileModal(avatarUrl, name, id, email, phone, dept, role, date, status, note, dangCo, daLam, daNhan, thieuSot);
@@ -151,10 +200,9 @@ public class member extends ScrollPane {
 
         Button btnDelete = format.formatCircleBtn("➖", "#ef4444", "#dc2626");
         if (onDelete != null) btnDelete.setOnAction(onDelete);
-
         actionBox.getChildren().addAll(btnView, btnDelete);
-        row.getChildren().addAll(avatarBox, lblName, lblBan, roleBox, statusBox, actionBox);
 
+        row.getChildren().addAll(avatarBox, lblName, lblBan, roleBox, statusBox, actionBox);
         return row;
     }
 
@@ -162,19 +210,12 @@ public class member extends ScrollPane {
         String bg = "rgba(124,77,255,0.1)";
         String fg = "#7c4dff";
         if (isRoleType) {
-            if (text.equals("Quản lý")) {
-                bg = "rgba(245,158,11,0.15)"; fg = "#f59e0b";
-            } else if (text.equals("Trưởng nhóm")) {
-                bg = "rgba(16,185,129,0.15)"; fg = "#10b981";
-            }
+            if (text.equals("Hội trưởng")) { bg = "rgba(245,158,11,0.15)"; fg = "#f59e0b"; }
+            else if (text.equals("Trưởng ban")) { bg = "rgba(16,185,129,0.15)"; fg = "#10b981"; }
         } else {
-            if (text.equals("Hoạt động")) {
-                bg = "rgba(16,185,129,0.15)"; fg = "#10b981";
-            } else if (text.equals("Tạm nghỉ")) {
-                bg = "rgba(245,158,11,0.15)"; fg = "#f59e0b";
-            } else if (text.equals("Đã rời") || text.equals("Bị khóa")) {
-                bg = "rgba(239,68,68,0.15)"; fg = "#ef4444";
-            }
+            if (text.equals("Hoạt động")) { bg = "rgba(16,185,129,0.15)"; fg = "#10b981"; }
+            else if (text.equals("Tạm nghỉ")) { bg = "rgba(245,158,11,0.15)"; fg = "#f59e0b"; }
+            else if (text.equals("Đã rời") || text.equals("Bị khóa")) { bg = "rgba(239,68,68,0.15)"; fg = "#ef4444"; }
         }
         return format.formatBadge(text, bg, fg);
     }
@@ -190,23 +231,24 @@ public class member extends ScrollPane {
         formBox.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
         Label title = format.formatLabel("Thêm thành viên", FontWeight.BLACK, 24, "#1e293b");
-        Label sub = format.formatLabel("Tìm theo mã định danh để cấp quyền.", FontWeight.MEDIUM, 13, "#94a3b8");
+        Label sub = format.formatLabel("Tìm kiếm người dùng theo mã định danh.", FontWeight.MEDIUM, 13, "#94a3b8");
         sub.setWrapText(true);
 
         VBox fields = new VBox(16);
-
         VBox idGroup = new VBox(8);
         HBox idRow = new HBox(12);
         TextField fId = format.formatTextField("Nhập mã...");
         HBox.setHgrow(fId, Priority.ALWAYS);
-        Button btnSearch = getFormBtn("🔍", "#5020d8", "white");
+        Button btnSearch = getShadowBtn("🔍", "", "#5020d8", "white", "rgba(80,32,216,0.4)");
+        btnSearch.setStyle(btnSearch.getStyle().replace("-fx-padding: 8 16 8 16;", "-fx-padding: 8 12 8 12;"));
         idRow.getChildren().addAll(fId, btnSearch);
         idGroup.getChildren().addAll(format.formatLabel("Mã định danh", FontWeight.BOLD, 12, "#94a3b8"), idRow);
 
         VBox deptGroup = new VBox(8);
         ComboBox<String> cbDept = format.formatSortBtn("Chọn bộ phận", "Nội dung", "Kỹ thuật", "Truyền thông", "Hậu cần", "Chưa phân ban");
         cbDept.setMaxWidth(Double.MAX_VALUE);
-        deptGroup.getChildren().addAll(format.formatLabel("Bộ phận trực thuộc", FontWeight.BOLD, 12, "#94a3b8"), cbDept);
+        fixHover(cbDept);
+        deptGroup.getChildren().addAll(format.formatLabel("Thêm vào bộ phận", FontWeight.BOLD, 12, "#94a3b8"), cbDept);
 
         VBox dateGroup = new VBox(8);
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -216,13 +258,13 @@ public class member extends ScrollPane {
         fields.getChildren().addAll(idGroup, deptGroup, dateGroup);
 
         HBox actions = new HBox(16);
-        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(16, 0, 0, 0));
 
-        Button btnCancel = getFormBtn("Huỷ", "rgba(178, 162, 228, 0.2)", "#64748b");
+        Button btnCancel = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
         btnCancel.setOnAction(e -> frame.getInstance().closeOverlayModal());
 
-        Button btnConfirm = getFormBtn("Xác nhận", "#10b981", "white");
+        Button btnConfirm = getModalActionBtn("Xác nhận", "#5020d8", "white", "rgba(80,32,216,0.4)");
         btnConfirm.setOnAction(e -> {
             if (fId.getText().trim().isEmpty() || cbDept.getValue() == null) {
                 frame.getInstance().triggerToast("Vui lòng nhập mã định danh và chọn bộ phận");
@@ -231,8 +273,8 @@ public class member extends ScrollPane {
             frame.getInstance().triggerToast("Đã thêm thành viên");
             frame.getInstance().closeOverlayModal();
         });
-        actions.getChildren().addAll(btnCancel, btnConfirm);
 
+        actions.getChildren().addAll(btnCancel, btnConfirm);
         formBox.getChildren().addAll(title, sub, fields, actions);
         rootModal.getChildren().add(formBox);
 
@@ -253,13 +295,17 @@ public class member extends ScrollPane {
             headerInfo.setAlignment(Pos.CENTER);
             ImageView avt = new ImageView(new Image("temp.png"));
             avt.setFitWidth(80); avt.setFitHeight(80); avt.setClip(new Circle(40, 40, 40));
-            headerInfo.getChildren().addAll(avt, format.formatLabel("Kết quả tìm thấy", FontWeight.BLACK, 20, "#1e293b"));
+
+            headerInfo.getChildren().addAll(
+                    avt,
+                    format.formatLabel("Kết quả tìm thấy", FontWeight.BLACK, 20, "#1e293b"),
+                    format.formatLabel("Nguyễn Văn A", FontWeight.BOLD, 16, "#5020d8")
+            );
 
             VBox infoList = new VBox(12);
             infoList.setAlignment(Pos.CENTER_LEFT);
             infoList.setPadding(new Insets(16));
             infoList.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 20px; -fx-border-color: #e2e8f0; -fx-border-radius: 20px; -fx-border-width: 1px;");
-
             infoList.getChildren().addAll(
                     new VBox(2, format.formatLabel("Mã định danh", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel(query, FontWeight.BOLD, 14, "#1e293b")),
                     new VBox(2, format.formatLabel("Email", FontWeight.BOLD, 10, "#94a3b8"), format.formatLabel("user@gmail.com", FontWeight.BOLD, 14, "#1e293b")),
@@ -270,14 +316,10 @@ public class member extends ScrollPane {
             profileActions.setAlignment(Pos.CENTER);
             profileActions.setPadding(new Insets(8, 0, 0, 0));
 
-            Button btnNotMatch = new Button("Hủy");
-            btnNotMatch.setPrefSize(120, 45);
-            btnNotMatch.setStyle("-fx-background-color: rgba(178, 162, 228, 0.2); -fx-text-fill: #64748b; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-background-radius: 20px; -fx-cursor: hand;");
+            Button btnNotMatch = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
             btnNotMatch.setOnAction(ev -> rootModal.getChildren().setAll(formBox));
 
-            Button btnMatch = new Button("Chọn");
-            btnMatch.setPrefSize(120, 45);
-            btnMatch.setStyle("-fx-background-color: #5020d8; -fx-text-fill: white; -fx-font-family: 'Google Sans'; -fx-font-weight: bold; -fx-background-radius: 20px; -fx-cursor: hand;");
+            Button btnMatch = getModalActionBtn("Chọn", "#5020d8", "white", "rgba(80,32,216,0.4)");
             btnMatch.setOnAction(ev -> {
                 rootModal.getChildren().setAll(formBox);
                 frame.getInstance().triggerToast("Đã chọn ứng viên, hãy thiết lập bộ phận");
@@ -285,7 +327,6 @@ public class member extends ScrollPane {
 
             profileActions.getChildren().addAll(btnNotMatch, btnMatch);
             mockProfile.getChildren().addAll(headerInfo, infoList, profileActions);
-
             rootModal.getChildren().setAll(mockProfile);
         });
 
@@ -295,7 +336,6 @@ public class member extends ScrollPane {
     private VBox createMemberProfileModal(String avatarUrl, String name, String id, String email, String phone, String dept, String role, String date, String status, String note, int dangCo, int daLam, int daNhan, int thieuSot) {
         VBox rootModal = new VBox();
         rootModal.setAlignment(Pos.CENTER);
-
         StackPane modalContentStack = new StackPane();
 
         VBox viewMode = new VBox(12);
@@ -306,11 +346,9 @@ public class member extends ScrollPane {
         viewMode.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
         HBox row1 = new HBox(24);
-
         VBox part1 = new VBox(16);
         part1.setAlignment(Pos.TOP_CENTER);
-        part1.setPrefWidth(200);
-        part1.setMaxWidth(200);
+        part1.setPrefWidth(200); part1.setMaxWidth(200);
 
         ImageView avt = new ImageView(new Image(avatarUrl));
         avt.setFitWidth(120); avt.setFitHeight(120); avt.setClip(new Circle(60, 60, 60));
@@ -331,85 +369,54 @@ public class member extends ScrollPane {
         part1.getChildren().addAll(avt, lblHeaderName, roleBadge, dateBox);
 
         VBox part2 = format.formatBoxCard();
-        part2.setPrefWidth(280);
-        part2.setMaxWidth(280);
+        part2.setPrefWidth(280); part2.setMaxWidth(280);
         part2.setPadding(new Insets(24));
         Label lblP2Title = format.formatLabel("THÔNG TIN CÁ NHÂN", FontWeight.BLACK, 13, "#94a3b8"); lblP2Title.setWrapText(true);
         part2.getChildren().add(lblP2Title);
 
         VBox infoList = new VBox(16);
-
-        Label lIdT = format.formatLabel("Mã định danh", FontWeight.BOLD, 11, "#94a3b8"); lIdT.setWrapText(true);
-        Label lIdV = format.formatLabel(id, FontWeight.BOLD, 14, "#1e293b"); lIdV.setWrapText(true);
-        infoList.getChildren().add(new VBox(4, lIdT, lIdV));
-
-        Label lEmT = format.formatLabel("Email", FontWeight.BOLD, 11, "#94a3b8"); lEmT.setWrapText(true);
-        Label lEmV = format.formatLabel(email, FontWeight.BOLD, 14, "#1e293b"); lEmV.setWrapText(true);
-        infoList.getChildren().add(new VBox(4, lEmT, lEmV));
-
-        Label lPhT = format.formatLabel("Số điện thoại", FontWeight.BOLD, 11, "#94a3b8"); lPhT.setWrapText(true);
-        Label lPhV = format.formatLabel(phone, FontWeight.BOLD, 14, "#1e293b"); lPhV.setWrapText(true);
-        infoList.getChildren().add(new VBox(4, lPhT, lPhV));
-
-        Label lDpT = format.formatLabel("Bộ phận", FontWeight.BOLD, 11, "#94a3b8"); lDpT.setWrapText(true);
-        Label lDpV = format.formatLabel(dept, FontWeight.BOLD, 14, "#1e293b"); lDpV.setWrapText(true);
-        infoList.getChildren().add(new VBox(4, lDpT, lDpV));
+        infoList.getChildren().addAll(
+                new VBox(4, format.formatLabel("Mã định danh", FontWeight.BOLD, 11, "#94a3b8"), format.formatLabel(id, FontWeight.BOLD, 14, "#1e293b")),
+                new VBox(4, format.formatLabel("Email", FontWeight.BOLD, 11, "#94a3b8"), format.formatLabel(email, FontWeight.BOLD, 14, "#1e293b")),
+                new VBox(4, format.formatLabel("Số điện thoại", FontWeight.BOLD, 11, "#94a3b8"), format.formatLabel(phone, FontWeight.BOLD, 14, "#1e293b")),
+                new VBox(4, format.formatLabel("Bộ phận", FontWeight.BOLD, 11, "#94a3b8"), format.formatLabel(dept, FontWeight.BOLD, 14, "#1e293b"))
+        );
 
         Label lStT = format.formatLabel("Trạng thái:", FontWeight.BOLD, 11, "#94a3b8"); lStT.setWrapText(true);
         Label lStV = createDynamicBadge(status, false); lStV.setWrapText(true);
         HBox statusLine = new HBox(8, lStT, lStV);
         statusLine.setAlignment(Pos.CENTER_LEFT);
         infoList.getChildren().add(statusLine);
-
         part2.getChildren().add(infoList);
 
         VBox part3 = format.formatBoxCard();
-        part3.setPrefWidth(300);
-        part3.setMaxWidth(300);
+        part3.setPrefWidth(300); part3.setMaxWidth(300);
         part3.setPadding(new Insets(24));
         Label p3Title = format.formatLabel("SỰ KIỆN & CÔNG VIỆC", FontWeight.BLACK, 13, "#94a3b8"); p3Title.setWrapText(true);
         part3.getChildren().add(p3Title);
 
         GridPane statGrid = new GridPane();
         statGrid.setHgap(20); statGrid.setVgap(16);
-
-        Label dcT = format.formatLabel("Đang có", FontWeight.BOLD, 11, "#64748b"); dcT.setWrapText(true);
-        Label dcV = format.formatLabel(String.valueOf(dangCo), FontWeight.BLACK, 24, "#3b82f6"); dcV.setWrapText(true);
-        statGrid.add(new VBox(6, dcT, dcV), 0, 0);
-
-        Label dlT = format.formatLabel("Đã hoàn thành", FontWeight.BOLD, 11, "#64748b"); dlT.setWrapText(true);
-        Label dlV = format.formatLabel(String.valueOf(daLam), FontWeight.BLACK, 24, "#10b981"); dlV.setWrapText(true);
-        statGrid.add(new VBox(6, dlT, dlV), 1, 0);
-
-        Label dnT = format.formatLabel("Đã giao", FontWeight.BOLD, 11, "#64748b"); dnT.setWrapText(true);
-        Label dnV = format.formatLabel(String.valueOf(daNhan), FontWeight.BLACK, 24, "#7c4dff"); dnV.setWrapText(true);
-        statGrid.add(new VBox(6, dnT, dnV), 0, 1);
-
-        Label tsT = format.formatLabel("Quá hạn", FontWeight.BOLD, 11, "#64748b"); tsT.setWrapText(true);
-        Label tsV = format.formatLabel(String.valueOf(thieuSot), FontWeight.BLACK, 24, "#ef4444"); tsV.setWrapText(true);
-        statGrid.add(new VBox(6, tsT, tsV), 1, 1);
-
+        statGrid.add(new VBox(6, format.formatLabel("Đang có", FontWeight.BOLD, 11, "#64748b"), format.formatLabel(String.valueOf(dangCo), FontWeight.BLACK, 24, "#3b82f6")), 0, 0);
+        statGrid.add(new VBox(6, format.formatLabel("Đã hoàn thành", FontWeight.BOLD, 11, "#64748b"), format.formatLabel(String.valueOf(daLam), FontWeight.BLACK, 24, "#10b981")), 1, 0);
+        statGrid.add(new VBox(6, format.formatLabel("Đã giao", FontWeight.BOLD, 11, "#64748b"), format.formatLabel(String.valueOf(daNhan), FontWeight.BLACK, 24, "#7c4dff")), 0, 1);
+        statGrid.add(new VBox(6, format.formatLabel("Quá hạn", FontWeight.BOLD, 11, "#64748b"), format.formatLabel(String.valueOf(thieuSot), FontWeight.BLACK, 24, "#ef4444")), 1, 1);
         part3.getChildren().add(statGrid);
 
-        Label cwT = format.formatLabel("Sự kiện ưu tiên hiện tại:", FontWeight.BOLD, 12, "#475569"); cwT.setWrapText(true);
-        VBox curWork = new VBox(8, cwT);
+        VBox curWork = new VBox(8, format.formatLabel("Sự kiện ưu tiên hiện tại:", FontWeight.BOLD, 12, "#475569"));
         curWork.setPadding(new Insets(16, 0, 0, 0));
         if (dangCo > 0) {
             Label lblWork = format.formatLabel("• Thiết kế Poster cho Sự kiện mới", FontWeight.BOLD, 14, "#7c4dff");
-            lblWork.setWrapText(true);
-            curWork.getChildren().add(lblWork);
+            lblWork.setWrapText(true); curWork.getChildren().add(lblWork);
         } else {
             Label lblNoWork = format.formatLabel("Không có sự kiện nào.", FontWeight.MEDIUM, 13, "#94a3b8");
-            lblNoWork.setWrapText(true);
-            curWork.getChildren().add(lblNoWork);
+            lblNoWork.setWrapText(true); curWork.getChildren().add(lblNoWork);
         }
         part3.getChildren().add(curWork);
-
         row1.getChildren().addAll(part1, part2, part3);
 
         VBox row2 = format.formatBoxCard();
-        row2.setSpacing(4);
-        row2.setMaxWidth(Double.MAX_VALUE);
+        row2.setSpacing(4); row2.setMaxWidth(Double.MAX_VALUE);
         row2.setPadding(new Insets(16, 24, 16, 24));
         Label r2Title = format.formatLabel("GHI CHÚ", FontWeight.BLACK, 13, "#94a3b8"); r2Title.setWrapText(true);
         String displayNote = (note == null || note.isEmpty()) ? "Chưa có ghi chú." : note;
@@ -419,68 +426,59 @@ public class member extends ScrollPane {
         HBox row3 = new HBox(16);
         row3.setAlignment(Pos.CENTER);
 
-        Button btnClose = getFormBtn("Đóng", "rgba(178, 162, 228, 0.2)", "#64748b");
+        Button btnClose = getModalActionBtn("Đóng", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
         btnClose.setOnAction(e -> frame.getInstance().closeOverlayModal());
 
-        Button btnSwitchToEdit = getFormBtn("Sửa hồ sơ", "#5020d8", "white");
+        Button btnSwitchToEdit = getModalActionBtn("Sửa hồ sơ", "#5020d8", "white", "rgba(80,32,216,0.4)");
         row3.getChildren().addAll(btnClose, btnSwitchToEdit);
 
         viewMode.getChildren().addAll(row1, row2, row3);
 
         VBox editMode = new VBox(16);
-        editMode.setPrefWidth(450);
-        editMode.setMaxWidth(450);
+        editMode.setPrefWidth(450); editMode.setMaxWidth(450);
         editMode.setPadding(new Insets(32));
         editMode.setStyle("-fx-background-color: white; -fx-background-radius: 40px; -fx-font-family: 'Google Sans';");
         editMode.setEffect(new DropShadow(45, 0, 15, Color.web("#311b92", 0.3)));
 
         VBox editHeader = new VBox(8);
         editHeader.setAlignment(Pos.CENTER);
-        Label eHT1 = format.formatLabel("Chỉnh sửa hồ sơ", FontWeight.BLACK, 22, "#1e293b"); eHT1.setWrapText(true);
-        Label eHT2 = format.formatLabel(name, FontWeight.BOLD, 14, "#7c4dff"); eHT2.setWrapText(true);
-        editHeader.getChildren().addAll(eHT1, eHT2);
+        editHeader.getChildren().addAll(
+                format.formatLabel("Chỉnh sửa hồ sơ", FontWeight.BLACK, 22, "#1e293b"),
+                format.formatLabel(name, FontWeight.BOLD, 14, "#7c4dff")
+        );
 
         VBox editForm = new VBox(12);
-
         ComboBox<String> cbDept = format.formatSortBtn("Chọn bộ phận", "Nội dung", "Kỹ thuật", "Truyền thông", "Hậu cần", "Chưa phân ban");
         cbDept.setValue(dept); cbDept.setMaxWidth(Double.MAX_VALUE);
+        fixHover(cbDept);
 
-        ComboBox<String> cbRole = format.formatSortBtn("Chọn chức vụ", "Quản lý", "Trưởng nhóm", "Thành viên");
+        ComboBox<String> cbRole = format.formatSortBtn("Chọn chức vụ", "Hội trưởng", "Trưởng ban", "Thành viên");
         cbRole.setValue(role); cbRole.setMaxWidth(Double.MAX_VALUE);
+        fixHover(cbRole);
 
         ComboBox<String> cbStatus = format.formatSortBtn("Chọn trạng thái", "Hoạt động", "Tạm nghỉ", "Đã rời", "Bị khóa");
         cbStatus.setValue(status); cbStatus.setMaxWidth(Double.MAX_VALUE);
+        fixHover(cbStatus);
 
         TextArea fNote = new TextArea(note);
         fNote.setPromptText("Nhập ghi chú mới...");
-        fNote.setWrapText(true);
-        fNote.setPrefRowCount(3);
-        fNote.setMaxWidth(Double.MAX_VALUE);
-        fNote.setMinHeight(80);
+        fNote.setWrapText(true); fNote.setPrefRowCount(3); fNote.setMaxWidth(Double.MAX_VALUE); fNote.setMinHeight(80);
         fNote.setStyle("-fx-background-radius: 12px; -fx-border-radius: 12px; -fx-font-family: 'Google Sans'; -fx-font-size: 13px; -fx-padding: 4; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0;");
 
-        Label el1 = format.formatLabel("Bộ phận trực thuộc", FontWeight.BOLD, 11, "#94a3b8"); el1.setWrapText(true);
-        Label el2 = format.formatLabel("Chức vụ", FontWeight.BOLD, 11, "#94a3b8"); el2.setWrapText(true);
-        Label el3 = format.formatLabel("Trạng thái", FontWeight.BOLD, 11, "#94a3b8"); el3.setWrapText(true);
-        Label el4 = format.formatLabel("Ghi chú", FontWeight.BOLD, 11, "#94a3b8"); el4.setWrapText(true);
-
         editForm.getChildren().addAll(
-                new VBox(6, el1, cbDept),
-                new VBox(6, el2, cbRole),
-                new VBox(6, el3, cbStatus),
-                new VBox(6, el4, fNote)
+                new VBox(6, format.formatLabel("Thêm vào bộ phận", FontWeight.BOLD, 11, "#94a3b8"), cbDept),
+                new VBox(6, format.formatLabel("Chức vụ", FontWeight.BOLD, 11, "#94a3b8"), cbRole),
+                new VBox(6, format.formatLabel("Trạng thái", FontWeight.BOLD, 11, "#94a3b8"), cbStatus),
+                new VBox(6, format.formatLabel("Ghi chú", FontWeight.BOLD, 11, "#94a3b8"), fNote)
         );
 
         HBox editActions = new HBox(12); editActions.setAlignment(Pos.CENTER);
         editActions.setPadding(new Insets(12, 0, 0, 0));
 
-        Button btnCancelEdit = getFormBtn("Huỷ", "rgba(178, 162, 228, 0.2)", "#64748b");
-        btnCancelEdit.setOnAction(e -> {
-            editMode.setVisible(false);
-            viewMode.setVisible(true);
-        });
+        Button btnCancelEdit = getModalActionBtn("Hủy", "rgba(178, 162, 228, 0.2)", "#64748b", "rgba(0,0,0,0.1)");
+        btnCancelEdit.setOnAction(e -> { editMode.setVisible(false); viewMode.setVisible(true); });
 
-        Button btnNext = getFormBtn("Lưu", "#10b981", "white");
+        Button btnNext = getModalActionBtn("Lưu", "#5020d8", "white", "rgba(80,32,216,0.4)");
         btnNext.setOnAction(e -> {
             frame.getInstance().triggerToast("Đã lưu thay đổi");
             frame.getInstance().closeOverlayModal();
@@ -489,26 +487,43 @@ public class member extends ScrollPane {
         editActions.getChildren().addAll(btnCancelEdit, btnNext);
         editMode.getChildren().addAll(editHeader, editForm, editActions);
 
-        viewMode.setVisible(true);
-        editMode.setVisible(false);
-
+        viewMode.setVisible(true); editMode.setVisible(false);
         modalContentStack.getChildren().addAll(viewMode, editMode);
         rootModal.getChildren().add(modalContentStack);
 
-        btnSwitchToEdit.setOnAction(e -> {
-            viewMode.setVisible(false);
-            editMode.setVisible(true);
-        });
+        btnSwitchToEdit.setOnAction(e -> { viewMode.setVisible(false); editMode.setVisible(true); });
 
         return rootModal;
     }
 
-    private static Button getFormBtn(String text, String bgColor, String textColor) {
-        Button btn = new Button(text);
-        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
-        btn.setTextFill(Color.web(textColor));
-        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 8 16 8 16; -fx-cursor: hand;");
+    private Button getShadowBtn(String text, String icon, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button();
+        HBox content = new HBox(8);
+        content.setAlignment(Pos.CENTER);
+        if (!icon.isEmpty()) {
+            Label lblIcon = new Label(icon); lblIcon.setTextFill(Color.web(textColor));
+            content.getChildren().add(lblIcon);
+        }
+        Label lblText = new Label(text);
+        lblText.setFont(Font.font("Google Sans", FontWeight.BOLD, 12));
+        lblText.setTextFill(Color.web(textColor));
+        content.getChildren().add(lblText);
+        btn.setGraphic(content);
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 40px; -fx-padding: 8 16 8 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
         btn.setOnMouseEntered(e -> { btn.setScaleX(1.05); btn.setScaleY(1.05); });
+        btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
+        return btn;
+    }
+
+    private Button getModalActionBtn(String text, String bgColor, String textColor, String shadowColor) {
+        Button btn = new Button(text);
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setPrefHeight(45);
+        HBox.setHgrow(btn, Priority.ALWAYS);
+        btn.setFont(Font.font("Google Sans", FontWeight.BOLD, 13));
+        btn.setTextFill(Color.web(textColor));
+        btn.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 20px; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, " + shadowColor + ", 10, 0, 0, 4);");
+        btn.setOnMouseEntered(e -> { btn.setScaleX(1.02); btn.setScaleY(1.02); });
         btn.setOnMouseExited(e -> { btn.setScaleX(1.0); btn.setScaleY(1.0); });
         return btn;
     }

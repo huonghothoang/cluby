@@ -23,10 +23,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import view.department;
-import view.format;
-import view.member;
-import view.setting;
+import view.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
